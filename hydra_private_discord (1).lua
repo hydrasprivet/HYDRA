@@ -1,4 +1,4 @@
-do return end-- hydra private
+-- hydra private
 local hydraSource = [====[
 
 local SAB_LIVE = function() return true end
