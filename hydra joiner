@@ -1,0 +1,2414 @@
+-- Deobfuscated by LuraLift (engine by ccjvwsod)
+-- Detected obfuscation: Luraph v15
+-- Local names are inferred from use (the original names are not in the bytecode)
+
+local HttpService = game:GetService("HttpService")
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local TeleportService = game:GetService("TeleportService")
+local SoundService = game:GetService("SoundService")
+local UserInputService = game:GetService("UserInputService")
+-- Set this to the Roblox asset ID after uploading the background image.
+-- Example: local HYDRA_BACKGROUND_ID = "1234567890"
+-- No external image required
+local placeId = game.PlaceId
+
+if placeId ~= 99606176102979 and placeId ~= 109983668079237 then
+	warn("[HYDRA JOINER] Unsupported PlaceId (" .. tostring(placeId) .. "). Script stopped.")
+	return
+end
+
+if CoreGui:FindFirstChild("HydraNotifier_GUI") then
+	CoreGui.HydraNotifier_GUI:Destroy()
+end
+
+if SoundService:FindFirstChild("HydraNotifSound") then
+	SoundService.HydraNotifSound:Destroy()
+end
+
+local localPlayer = Players.LocalPlayer
+
+if localPlayer.Character then
+	local head = localPlayer.Character:FindFirstChild("Head")
+
+	if head and head:FindFirstChild("HYDRA_USER_ESP") then
+		head.HYDRA_USER_ESP:Destroy()
+	end
+end
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "HydraNotifier_GUI"
+screenGui.Parent = CoreGui
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+local tbl = {
+	BgDark = Color3.fromRGB(11, 8, 24),
+	BgMid = Color3.fromRGB(20, 12, 40),
+	BgCard = Color3.fromRGB(29, 18, 54),
+	BgCardHover = Color3.fromRGB(49, 27, 82),
+	Sidebar = Color3.fromRGB(14, 9, 30),
+	Accent1 = Color3.fromRGB(171, 75, 246),
+	Accent2 = Color3.fromRGB(241, 219, 255),
+	AccentGlow = Color3.fromRGB(130, 45, 201),
+	White = Color3.fromRGB(248, 244, 255),
+	TextDim = Color3.fromRGB(178, 152, 203),
+	Off = Color3.fromRGB(70, 55, 98),
+	Green = Color3.fromRGB(159, 61, 239),
+	GreenDim = Color3.fromRGB(55, 29, 87),
+	Red = Color3.fromRGB(211, 75, 159),
+	HighlightC = Color3.fromRGB(243, 129, 237),
+	MidlightC = Color3.fromRGB(170, 120, 241),
+}
+
+local tbl2 = {
+	Midlights = true,
+	Highlights = true,
+	AutoJoin = false,
+	AutoJoinRetries = 3,
+	InterfaceScale = 1, -- GUI zoom, 0.60 to 1.30 (viewport-limited)
+	PlaySound = true,
+	ToggleKey = "RightShift",
+	UseWhitelist = false,
+	Whitelist = {},
+}
+
+pcall(function()
+	if isfile and readfile and isfile("HydraNotifier_Config.json") then
+		local data = HttpService:JSONDecode(readfile("HydraNotifier_Config.json"))
+
+		if type(data) == "table" then
+			for k, v in pairs(data) do
+				if k == "Whitelist" and type(v) == "table" then
+					for k2, v2 in pairs(v) do
+						tbl2.Whitelist[k2] = v2
+					end
+				else
+					tbl2[k] = v
+				end
+			end
+		end
+	end
+end)
+
+task.spawn(function()
+	local json = HttpService:JSONEncode(tbl2)
+
+	while _G.HydraRunning ~= false do
+		task.wait(3)
+
+		pcall(function()
+			local json2 = HttpService:JSONEncode(tbl2)
+
+			if json2 ~= json then
+				if writefile then
+					writefile("HydraNotifier_Config.json", json2)
+				end
+
+				json = json2
+			end
+		end)
+	end
+end)
+
+local tbl3 = {
+	"Los Nooo My Hotspotsitos",
+	"Serafinna Medusella",
+	"La Grande Combinassion",
+	"La Easter Grande",
+	"Rang Ring Bus",
+	"Guest 666",
+	"Los Mi Gatitos",
+	"Los Chicleteiras",
+	"Noo My Eggs",
+	"67",
+	"Donkeyturbo Express",
+	"Mariachi Corazoni",
+	"Los Burritos",
+	"Los 25",
+	"Tacorillo Crocodillo",
+	"Swag Soda",
+	"Noo my Heart",
+	"Chimnino",
+	"Los Combinasionas",
+	"Chicleteira Noelteira",
+	"Fishino Clownino",
+	"Baskito",
+	"Tacorita Bicicleta",
+	"Los Sweethearts",
+	"Spinny Hammy",
+	"Nuclearo Dinosauro",
+	"Las Sis",
+	"DJ Panda",
+	"Chicleteira Cupideira",
+	"La Karkerkar Combinasion",
+	"Chillin Chili",
+	"Chipso and Queso",
+	"Money Money Reindeer",
+	"Money Money Puggy",
+	"Churrito Bunnito",
+	"Celularcini Viciosini",
+	"Los Planitos",
+	"Los Mobilis",
+	"Los 67",
+	"Mieteteira Bicicleteira",
+	"Tuff Toucan",
+	"La Spooky Grande",
+	"Los Spooky Combinasionas",
+	"Cigno Fulgoro",
+	"Los Candies",
+	"Los Hotspositos",
+	"Los Jolly Combinasionas",
+	"Los Cupids",
+	"Los Puggies",
+	"W or L",
+	"Tralalalaledon",
+	"La Extinct Grande Combinasion",
+	"Tralaledon",
+	"La Jolly Grande",
+	"Los Primos",
+	"Bacuru and Egguru",
+	"Eviledon",
+	"Los Tacoritas",
+	"Lovin Rose",
+	"Tang Tang Kelentang",
+	"Ketupat Kepat",
+	"Los Bros",
+	"Tictac Sahur",
+	"La Romantic Grande",
+	"Gingerat Gerat",
+	"Orcaledon",
+	"La Lucky Grande",
+	"Ketchuru and Masturu",
+	"Jolly Jolly Sahur",
+	"Garama and Madundung",
+	"Rosetti Tualetti",
+	"Nacho Spyder",
+	"Hopilikalika Hopilikalako",
+	"Festive 67",
+	"Sammyni Fattini",
+	"Love Love Bear",
+	"La Ginger Sekolah",
+	"Spooky and Pumpky",
+	"Boppin Bunny",
+	"Lavadorito Spinito",
+	"La Food Combinasion",
+	"Los Spaghettis",
+	"La Casa Boo",
+	"Fragrama and Chocrama",
+	"Los Sekolahs",
+	"Foxini Lanternini",
+	"La Secret Combinasion",
+	"Los Amigos",
+	"Reinito Sleighito",
+	"Ketupat Bros",
+	"Burguro and Fryuro",
+	"Cooki and Milki",
+	"Capitano Moby",
+	"Rosey and Teddy",
+	"Popcuru and Fizzuru",
+	"Hydra Bunny",
+	"Celestial Pegasus",
+	"Cerberus",
+	"La Supreme Combinasion",
+	"Dragon Cannelloni",
+	"Dragon Gingerini",
+	"Headless Horseman",
+	"Hydra Dragon Cannelloni",
+	"Griffin",
+	"Skibidi Toilet",
+	"Meowl",
+	"Strawberry Elephant",
+	"La Vacca Saturno Saturnita",
+	"Pandanini Frostini",
+	"Bisonte Giuppitere",
+	"Blackhole Goat",
+	"Jackorilla",
+	"Agarrini Ia Palini",
+	"Chachechi",
+	"Karkerkar Kurkur",
+	"Los Tortus",
+	"Los Matteos",
+	"Sammyni Spyderini",
+	"Trenostruzzo Turbo 4000",
+	"Chimpanzini Spiderini",
+	"Boatito Auratito",
+	"Fragola La La La",
+	"Dul Dul Dul",
+	"La Vacca Prese Presente",
+	"Frankentteo",
+	"Los Trios",
+	"Karker Sahur",
+	"Torrtuginni Dragonfrutini (Lucky Block)",
+	"Los Tralaleritos",
+	"Zombie Tralala",
+	"La Cucaracha",
+	"Vulturino Skeletono",
+	"Guerriro Digitale",
+	"Extinct Tralalero",
+	"Yess My Examine",
+	"Extinct Matteo",
+	"Las Tralaleritas",
+	"Rocco Disco",
+	"Reindeer Tralala",
+	"Las Vaquitas Saturnitas",
+	"Pumpkin Spyderini",
+	"Job Job Job Sahur",
+	"Los Karkeritos",
+	"Graipuss Medussi",
+	"Santteo",
+	"Fishboard",
+	"Buntteo",
+	"La Vacca Jacko Linterino",
+	"Triplito Tralaleritos",
+	"Trickolino",
+	"Paradiso Axolottino",
+	"GOAT",
+	"Giftini Spyderini",
+	"Los Spyderinis",
+	"Love Love Love Sahur",
+	"Perrito Burrito",
+	"1x1x1x1",
+	"Los Cucarachas",
+	"Easter Easter Sahur",
+	"Please My Present",
+	"Cuadramat and Pakrahmatmamat",
+	"Los Jobcitos",
+	"Nooo My Hotspot",
+	"Pot Hotspot (Lucky Block)",
+	"Noo My Examine",
+	"Telemorte",
+	"La Sahur Combinasion",
+	"List List List Sahur",
+	"Bunny Bunny Bunny Sahur",
+	"To To To Sahur",
+	"Pirulitoita Bicicletaire",
+	"25",
+	"Santa Hotspot",
+	"Horegini Boom",
+	"Quesadilla Crocodila",
+	"Pot Pumpkin",
+	"Naughty Naughty",
+	"Cupid Cupid Sahur",
+	"Ho Ho Ho Sahur",
+	"Mi Gatito",
+	"Chicleteira Bicicleteira",
+	"Eid Eid Eid Sahur",
+	"Cupid Hotspot",
+	"Spaghetti Tualetti (Lucky Block)",
+	"Esok Sekolah (Lucky Block)",
+	"Quesadillo Vampiro",
+	"Brunito Marsito",
+	"Chill Puppy",
+	"Burrito Bandito",
+	"Chicleteirina Bicicleteirina",
+	"Granny",
+	"Los Bunitos",
+	"Los Quesadillas",
+	"Bunito Bunito Spinito",
+	"Noo My Candy",
+}
+
+local sound = Instance.new("Sound")
+sound.Name = "HydraNotifSound"
+sound.SoundId = "rbxassetid://4590662766"
+sound.Volume = 1
+sound.Parent = SoundService
+
+local function fn()
+	if tbl2.PlaySound then
+		sound:Play()
+	end
+end
+
+local function fn2(arg)
+	local n = tonumber(arg) or 0
+	if n >= 1000000 then
+		return string.format("%.1fM", n / 1000000):gsub("%.0M", "M")
+	end
+
+	if n >= 1000 then
+		return string.format("%.1fK", n / 1000):gsub("%.0K", "K")
+	end
+	return tostring(n)
+end
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 820, 0, 508)
+frame.Position = UDim2.new(0.5, -410, 1.5, 0)
+frame.BackgroundColor3 = tbl.BgDark
+frame.BackgroundTransparency = 0
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+frame.ClipsDescendants = true
+frame.Parent = screenGui
+-- Stable native Roblox background. No images, no overlapping decorative layers.
+local background = Instance.new("Frame")
+background.Name = "HydraBackground"
+background.BackgroundTransparency = 1
+background.Size = UDim2.fromScale(1,1)
+background.Parent = frame
+local atmosphericGlow = Instance.new("Frame")
+atmosphericGlow.BackgroundTransparency = 1
+atmosphericGlow.Size = UDim2.fromScale(1,1)
+atmosphericGlow.Parent = background
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
+-- Ensure interactive panels render above the cinematic image.
+
+local uiStroke = Instance.new("UIStroke")
+uiStroke.Thickness = 2
+uiStroke.Color = tbl.Accent1
+uiStroke.Transparency = 0.35
+uiStroke.Parent = frame
+local uiGradient = Instance.new("UIGradient")
+local colorSequence = ColorSequence.new
+local tbl4 = {}
+local v = ColorSequenceKeypoint.new(0, Color3.fromRGB(114, 43, 224))
+local v2 = ColorSequenceKeypoint.new(0.5, Color3.fromRGB(225, 98, 255))
+local new = ColorSequenceKeypoint.new
+local color = Color3.fromRGB
+tbl4[1] = v
+tbl4[2] = v2
+
+do
+	local values = table.pack(new(1, color(105, 53, 243)))
+	table.move(values, 1, values.n, 3, tbl4)
+end
+
+uiGradient.Color = colorSequence(tbl4)
+uiGradient.Parent = uiStroke
+local udim2 = UDim2.new(0.5, -410, 0.5, -254)
+local udim22 = UDim2.new(0.5, -410, 1.5, 0)
+local flag = true
+
+task.delay(0.1, function()
+	local tbl5 = { Position = udim2 }
+	TweenService:Create(frame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), tbl5):Play()
+end)
+
+local frame2 = Instance.new("Frame")
+frame2.Size = UDim2.new(0, 186, 1, 0)
+frame2.BackgroundColor3 = tbl.Sidebar
+frame2.BackgroundTransparency = 0.04
+frame2.ZIndex = 1
+frame2.BorderSizePixel = 0
+frame2.Parent = frame
+Instance.new("UICorner", frame2).CornerRadius = UDim.new(0, 12)
+local frame3 = Instance.new("Frame")
+frame3.Size = UDim2.new(0, 12, 1, 0)
+frame3.Position = UDim2.new(1, -12, 0, 0)
+frame3.BackgroundColor3 = tbl.Sidebar
+frame3.BackgroundTransparency = 0.04
+frame3.BorderSizePixel = 0
+frame3.Parent = frame2
+local frame4 = Instance.new("Frame")
+frame4.Size = UDim2.new(0, 1, 1, -20)
+frame4.Position = UDim2.new(1, 0, 0, 10)
+frame4.BackgroundColor3 = tbl.Off
+frame4.BorderSizePixel = 0
+frame4.Parent = frame2
+local textLabel = Instance.new("TextLabel")
+textLabel.Size = UDim2.new(1, 0, 0, 45)
+textLabel.Position = UDim2.new(0, 0, 0, 8)
+textLabel.BackgroundTransparency = 1
+textLabel.Text = "✦  HYDRA"
+textLabel.TextStrokeTransparency = 0.68
+textLabel.TextStrokeColor3 = Color3.fromRGB(184, 68, 255)
+textLabel.Font = Enum.Font.GothamBlack
+textLabel.TextSize = 23
+textLabel.TextColor3 = tbl.Accent2
+textLabel.Parent = frame2
+local textLabel2 = Instance.new("TextLabel")
+textLabel2.Size = UDim2.new(1, 0, 0, 14)
+textLabel2.Position = UDim2.new(0, 0, 0, 42)
+textLabel2.BackgroundTransparency = 1
+textLabel2.Text = "J O I N E R"
+textLabel2.Font = Enum.Font.Gotham
+textLabel2.TextSize = 10
+textLabel2.TextColor3 = tbl.TextDim
+textLabel2.Parent = frame2
+local textButton = Instance.new("TextButton")
+textButton.Size = UDim2.new(0, 28, 0, 28)
+textButton.Position = UDim2.new(1, -40, 0, 14)
+textButton.BackgroundColor3 = tbl.BgCardHover
+textButton.BackgroundTransparency = 0.3
+textButton.Text = "X"
+textButton.Font = Enum.Font.GothamBold
+textButton.TextColor3 = Color3.fromRGB(255, 90, 90)
+textButton.TextSize = 12
+textButton.Parent = frame
+Instance.new("UICorner", textButton).CornerRadius = UDim.new(0, 8)
+local uiStroke2 = Instance.new("UIStroke")
+uiStroke2.Color = Color3.fromRGB(255, 90, 90)
+uiStroke2.Transparency = 0.7
+uiStroke2.Parent = textButton
+local textButton2 = Instance.new("TextButton")
+textButton2.Size = UDim2.new(0, 28, 0, 28)
+textButton2.Position = UDim2.new(1, -76, 0, 14)
+textButton2.BackgroundColor3 = tbl.BgCardHover
+textButton2.BackgroundTransparency = 0.3
+textButton2.Text = "-"
+textButton2.Font = Enum.Font.GothamBold
+textButton2.TextColor3 = Color3.fromRGB(255, 190, 80)
+textButton2.TextSize = 12
+textButton2.Parent = frame
+Instance.new("UICorner", textButton2).CornerRadius = UDim.new(0, 8)
+local uiStroke3 = Instance.new("UIStroke")
+uiStroke3.Color = Color3.fromRGB(255, 190, 80)
+uiStroke3.Transparency = 0.7
+uiStroke3.Parent = textButton2
+
+textButton.MouseEnter:Connect(function()
+	TweenService:Create(uiStroke2, TweenInfo.new(0.2), { Transparency = 0 }):Play()
+	TweenService:Create(textButton, TweenInfo.new(0.2), { BackgroundColor3 = Color3.fromRGB(200, 50, 50), TextColor3 = tbl.White }):Play()
+end)
+
+textButton.MouseLeave:Connect(function()
+	TweenService:Create(uiStroke2, TweenInfo.new(0.2), { Transparency = 0.7 }):Play()
+	TweenService:Create(textButton, TweenInfo.new(0.2), { BackgroundColor3 = tbl.BgCardHover, TextColor3 = Color3.fromRGB(255, 90, 90) }):Play()
+end)
+
+textButton2.MouseEnter:Connect(function()
+	TweenService:Create(uiStroke3, TweenInfo.new(0.2), { Transparency = 0 }):Play()
+	TweenService:Create(textButton2, TweenInfo.new(0.2), { BackgroundColor3 = Color3.fromRGB(200, 150, 40), TextColor3 = tbl.White }):Play()
+end)
+
+textButton2.MouseLeave:Connect(function()
+	TweenService:Create(uiStroke3, TweenInfo.new(0.2), { Transparency = 0.7 }):Play()
+	TweenService:Create(textButton2, TweenInfo.new(0.2), { BackgroundColor3 = tbl.BgCardHover, TextColor3 = Color3.fromRGB(255, 190, 80) }):Play()
+end)
+
+textButton.MouseButton1Click:Connect(function()
+	_G.HydraRunning = false
+	local tbl5 = { Position = udim22 }
+	TweenService:Create(frame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.In), tbl5):Play()
+
+	task.delay(0.4, function()
+		screenGui:Destroy()
+
+		if SoundService:FindFirstChild("HydraNotifSound") then
+			SoundService.HydraNotifSound:Destroy()
+		end
+
+		if localPlayer.Character then
+			local head = localPlayer.Character:FindFirstChild("Head")
+
+			if head and head:FindFirstChild("HYDRA_USER_ESP") then
+				head.HYDRA_USER_ESP:Destroy()
+			end
+		end
+	end)
+end)
+
+-- HYDRA V8: Toggle is always reversible and owns a floating quick-access button.
+-- It lives directly under ScreenGui so hiding the main frame never hides this button.
+local refreshQuickToggle = function() end
+local toggleAnimation
+local function fn3()
+    flag = not flag
+    if toggleAnimation then
+        toggleAnimation:Cancel()
+        toggleAnimation = nil
+    end
+    frame.Visible = true
+    if flag then
+        toggleAnimation = TweenService:Create(frame,
+            TweenInfo.new(0.32, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
+            {Position = udim2})
+        toggleAnimation:Play()
+    else
+        local hideAnimation = TweenService:Create(frame,
+            TweenInfo.new(0.28, Enum.EasingStyle.Quart, Enum.EasingDirection.In),
+            {Position = udim22})
+        toggleAnimation = hideAnimation
+        hideAnimation.Completed:Connect(function(playback)
+            if playback == Enum.PlaybackState.Completed and not flag and toggleAnimation == hideAnimation then
+                frame.Visible = false
+            end
+        end)
+        hideAnimation:Play()
+    end
+    refreshQuickToggle()
+end
+
+textButton2.MouseButton1Click:Connect(fn3)
+
+-- A polished floating launcher. Unlike the earlier unused HJ badge,
+-- clicking this one actually opens AND closes the hub.
+local textButton3 = Instance.new("TextButton")
+textButton3.Name = "HydraOpenCloseButton"
+textButton3.Size = UDim2.fromOffset(162, 52)
+textButton3.Position = UDim2.new(0, 16, 0.49, -26)
+textButton3.BackgroundColor3 = Color3.fromRGB(17, 9, 40)
+textButton3.BorderSizePixel = 0
+textButton3.Text = ""
+textButton3.AutoButtonColor = false
+textButton3.Active = true
+textButton3.ZIndex = 30
+textButton3.Parent = screenGui
+
+local quickCorner = Instance.new("UICorner")
+quickCorner.CornerRadius = UDim.new(0, 15)
+quickCorner.Parent = textButton3
+local quickGradient = Instance.new("UIGradient")
+quickGradient.Rotation = 15
+quickGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(48, 18, 100)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(24, 12, 54)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(11, 8, 29)),
+})
+quickGradient.Parent = textButton3
+local quickStroke = Instance.new("UIStroke")
+quickStroke.Color = Color3.fromRGB(175, 80, 255)
+quickStroke.Thickness = 1.5
+quickStroke.Transparency = 0.18
+quickStroke.Parent = textButton3
+
+local quickSymbol = Instance.new("TextLabel")
+quickSymbol.Name = "HydraSymbol"
+quickSymbol.BackgroundColor3 = Color3.fromRGB(105, 31, 181)
+quickSymbol.BorderSizePixel = 0
+quickSymbol.Size = UDim2.fromOffset(37, 37)
+quickSymbol.Position = UDim2.fromOffset(8, 7)
+quickSymbol.Text = "✦"
+quickSymbol.Font = Enum.Font.GothamBlack
+quickSymbol.TextColor3 = Color3.fromRGB(255, 232, 255)
+quickSymbol.TextSize = 25
+quickSymbol.ZIndex = 31
+quickSymbol.Parent = textButton3
+local symbolCorner = Instance.new("UICorner")
+symbolCorner.CornerRadius = UDim.new(0, 11)
+symbolCorner.Parent = quickSymbol
+local symbolStroke = Instance.new("UIStroke")
+symbolStroke.Color = Color3.fromRGB(216, 124, 255)
+symbolStroke.Transparency = 0.35
+symbolStroke.Thickness = 1
+symbolStroke.Parent = quickSymbol
+local quickTitle = Instance.new("TextLabel")
+quickTitle.BackgroundTransparency = 1
+quickTitle.Size = UDim2.fromOffset(106, 21)
+quickTitle.Position = UDim2.fromOffset(51, 7)
+quickTitle.Font = Enum.Font.GothamBlack
+quickTitle.Text = "HYDRA"
+quickTitle.TextSize = 17
+quickTitle.TextColor3 = Color3.fromRGB(245, 228, 255)
+quickTitle.TextXAlignment = Enum.TextXAlignment.Left
+quickTitle.ZIndex = 31
+quickTitle.Parent = textButton3
+local quickHint = Instance.new("TextLabel")
+quickHint.Name = "ToggleHint"
+quickHint.BackgroundTransparency = 1
+quickHint.Size = UDim2.fromOffset(106, 16)
+quickHint.Position = UDim2.fromOffset(52, 27)
+quickHint.Font = Enum.Font.GothamBold
+quickHint.Text = "MASQUER LE HUB"
+quickHint.TextSize = 9
+quickHint.TextColor3 = Color3.fromRGB(198, 141, 255)
+quickHint.TextXAlignment = Enum.TextXAlignment.Left
+quickHint.ZIndex = 31
+quickHint.Parent = textButton3
+
+refreshQuickToggle = function()
+    quickHint.Text = flag and "MASQUER LE HUB" or "OUVRIR LE HUB"
+    quickStroke.Color = flag and Color3.fromRGB(170, 80, 255) or Color3.fromRGB(223, 102, 255)
+    quickSymbol.BackgroundColor3 = flag and Color3.fromRGB(105, 31, 181) or Color3.fromRGB(139, 45, 207)
+end
+refreshQuickToggle()
+local movedDuringDrag = false
+textButton3.MouseButton1Click:Connect(function()
+    if not movedDuringDrag then
+        fn3()
+    end
+end)
+textButton3.MouseEnter:Connect(function()
+    TweenService:Create(quickStroke, TweenInfo.new(0.16), {Transparency = 0, Thickness = 2.3}):Play()
+end)
+textButton3.MouseLeave:Connect(function()
+    TweenService:Create(quickStroke, TweenInfo.new(0.16), {Transparency = 0.18, Thickness = 1.5}):Play()
+end)
+
+-- Draggable launcher; works for both mouse and touchscreen.
+local draggingLauncher = false
+local dragInput
+local dragStart
+local dragOrigin
+textButton3.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        draggingLauncher = true
+        movedDuringDrag = false
+        dragStart = input.Position
+        dragOrigin = textButton3.Position
+        dragInput = input
+    end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if draggingLauncher and dragStart and dragOrigin and
+        (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        if math.abs(delta.X) + math.abs(delta.Y) > 8 then movedDuringDrag = true end
+        local vp = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize
+        if vp then
+            local newX = math.clamp(dragOrigin.X.Offset + delta.X, 4, math.max(4, vp.X - 166))
+            local newY = math.clamp(dragOrigin.Y.Offset + delta.Y + dragOrigin.Y.Scale * vp.Y, 4, math.max(4, vp.Y - 56))
+            textButton3.Position = UDim2.fromOffset(newX, newY)
+        end
+    end
+end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        draggingLauncher = false
+    end
+end)
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then
+		return
+	end
+
+	if input.KeyCode.Name == tbl2.ToggleKey then
+		fn3()
+	end
+end)
+
+local frame6 = Instance.new("Frame")
+frame6.Size = UDim2.new(1, -186, 1, -2)
+frame6.Position = UDim2.new(0, 186, 0, 2)
+frame6.BackgroundTransparency = 1
+frame6.Parent = frame
+local frame7 = Instance.new("Frame")
+frame7.Size = UDim2.new(1, -186, 1, -2)
+frame7.Position = UDim2.new(0, 186, 0, 2)
+frame7.BackgroundTransparency = 1
+frame7.Visible = false
+frame7.Parent = frame
+local frame8 = Instance.new("Frame")
+frame8.Size = UDim2.new(1, -186, 1, -2)
+frame8.Position = UDim2.new(0, 186, 0, 2)
+frame8.BackgroundTransparency = 1
+frame8.Visible = false
+frame8.Parent = frame
+local str = "logs"
+local tbl5 = {}
+
+local function createTextButton(arg, arg2, arg3, arg4)
+	local textButton4 = Instance.new("TextButton")
+	textButton4.Size = UDim2.new(1, -26, 0, 42)
+	textButton4.Position = UDim2.new(0, 13, 0, arg3)
+	textButton4.BackgroundColor3 = tbl.BgCard
+	textButton4.BackgroundTransparency = arg4 == "logs" and 0 or 1
+	textButton4.BorderSizePixel = 0
+	textButton4.Text = ""
+	textButton4.AutoButtonColor = false
+	textButton4.Parent = frame2
+	Instance.new("UICorner", textButton4).CornerRadius = UDim.new(0, 6)
+	local frame9 = Instance.new("Frame")
+	frame9.Size = UDim2.new(0, 3, 0.6, 0)
+	frame9.Position = UDim2.new(0, 0, 0.2, 0)
+	frame9.BackgroundColor3 = tbl.Accent1
+	frame9.BackgroundTransparency = arg4 == "logs" and 0 or 1
+	frame9.Parent = textButton4
+	Instance.new("UICorner", frame9).CornerRadius = UDim.new(1, 0)
+	local textLabel3 = Instance.new("TextLabel")
+	textLabel3.Size = UDim2.new(1, -15, 1, 0)
+	textLabel3.Position = UDim2.new(0, 15, 0, 0)
+	textLabel3.BackgroundTransparency = 1
+	textLabel3.TextXAlignment = Enum.TextXAlignment.Left
+	textLabel3.Text = arg2
+	textLabel3.Font = Enum.Font.GothamSemibold
+	textLabel3.TextSize = 13
+	textLabel3.TextColor3 = arg4 == "logs" and tbl.White or tbl.TextDim
+	textLabel3.Parent = textButton4
+	tbl5[arg4] = { btn = textButton4, ind = frame9, lbl = textLabel3 }
+	return textButton4
+end
+
+local v3 = createTextButton("L", "Logs", 180, "logs")
+local v4 = createTextButton("S", "Settings", 237, "settings")
+local v5 = createTextButton("W", "Whitelist", 294, "whitelist")
+
+local function fn5(arg)
+	str = arg
+	frame6.Visible = arg == "logs"
+	frame7.Visible = arg == "settings"
+	frame8.Visible = arg == "whitelist"
+
+	for k, v6 in pairs(tbl5) do
+		local flag4 = k == arg
+		TweenService:Create(v6.btn, TweenInfo.new(0.2), { BackgroundTransparency = flag4 and 0 or 1 }):Play()
+		TweenService:Create(v6.ind, TweenInfo.new(0.2), { BackgroundTransparency = flag4 and 0 or 1 }):Play()
+		v6.lbl.TextColor3 = flag4 and tbl.White or tbl.TextDim
+	end
+end
+
+v3.MouseButton1Click:Connect(function()
+	fn5("logs")
+end)
+
+v4.MouseButton1Click:Connect(function()
+	fn5("settings")
+end)
+
+v5.MouseButton1Click:Connect(function()
+	fn5("whitelist")
+end)
+
+local textLabel3 = Instance.new("TextLabel")
+textLabel3.Size = UDim2.new(1, 0, 0, 20)
+textLabel3.Position = UDim2.new(0, 0, 1, -25)
+textLabel3.BackgroundTransparency = 1
+textLabel3.Text = tbl2.ToggleKey .. " = Toggle"
+textLabel3.Font = Enum.Font.Gotham
+textLabel3.TextSize = 9
+textLabel3.TextColor3 = tbl.Off
+textLabel3.Parent = frame2
+local scrollingFrame = Instance.new("ScrollingFrame")
+scrollingFrame.Size = UDim2.new(1, 0, 1, 0)
+scrollingFrame.BackgroundTransparency = 1
+scrollingFrame.BorderSizePixel = 0
+scrollingFrame.ScrollBarThickness = 2
+scrollingFrame.ScrollBarImageColor3 = tbl.Off
+scrollingFrame.Parent = frame7
+local uiListLayout = Instance.new("UIListLayout")
+uiListLayout.Parent = scrollingFrame
+uiListLayout.Padding = UDim.new(0, 8)
+uiListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+local uiPadding = Instance.new("UIPadding")
+uiPadding.PaddingTop = UDim.new(0, 15)
+uiPadding.PaddingLeft = UDim.new(0, 18)
+uiPadding.PaddingRight = UDim.new(0, 18)
+uiPadding.Parent = scrollingFrame
+
+uiListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+	scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, uiListLayout.AbsoluteContentSize.Y + 20)
+end)
+
+local function fn6(parent, text, arg)
+	local frame9 = Instance.new("Frame")
+	frame9.Size = UDim2.new(1, 0, 0, 42)
+	frame9.BackgroundColor3 = tbl.BgCard
+	frame9.Parent = parent
+	Instance.new("UICorner", frame9).CornerRadius = UDim.new(0, 8)
+	local textLabel4 = Instance.new("TextLabel")
+	textLabel4.Size = UDim2.new(1, -65, 1, 0)
+	textLabel4.Position = UDim2.new(0, 14, 0, 0)
+	textLabel4.BackgroundTransparency = 1
+	textLabel4.TextXAlignment = Enum.TextXAlignment.Left
+	textLabel4.Text = text
+	textLabel4.Font = Enum.Font.GothamSemibold
+	textLabel4.TextSize = 13
+	textLabel4.TextColor3 = tbl.White
+	textLabel4.Parent = frame9
+	local textButton4 = Instance.new("TextButton")
+	textButton4.Size = UDim2.new(0, 42, 0, 22)
+	textButton4.Position = UDim2.new(1, -56, 0.5, -11)
+	textButton4.BackgroundColor3 = tbl2[arg] and tbl.Accent1 or tbl.Off
+	textButton4.Text = ""
+	textButton4.Parent = frame9
+	Instance.new("UICorner", textButton4).CornerRadius = UDim.new(1, 0)
+	local frame10 = Instance.new("Frame")
+	frame10.Size = UDim2.new(0, 16, 0, 16)
+	frame10.Position = tbl2[arg] and UDim2.new(1, -19, 0, 3) or UDim2.new(0, 3, 0, 3)
+	frame10.BackgroundColor3 = tbl.White
+	frame10.Parent = textButton4
+	Instance.new("UICorner", frame10).CornerRadius = UDim.new(1, 0)
+
+	textButton4.MouseButton1Click:Connect(function()
+		tbl2[arg] = not tbl2[arg]
+		local v6 = tbl2[arg]
+		TweenService:Create(frame10, TweenInfo.new(0.15, Enum.EasingStyle.Quad), { Position = v6 and UDim2.new(1, -19, 0, 3) or UDim2.new(0, 3, 0, 3) }):Play()
+		TweenService:Create(textButton4, TweenInfo.new(0.15), { BackgroundColor3 = v6 and tbl.Accent1 or tbl.Off }):Play()
+	end)
+end
+
+local function fn7(parent, text, arg)
+	local frame9 = Instance.new("Frame")
+	frame9.Size = UDim2.new(1, 0, 0, 42)
+	frame9.BackgroundColor3 = tbl.BgCard
+	frame9.Parent = parent
+	Instance.new("UICorner", frame9).CornerRadius = UDim.new(0, 8)
+	local textLabel4 = Instance.new("TextLabel")
+	textLabel4.Size = UDim2.new(1, -65, 1, 0)
+	textLabel4.Position = UDim2.new(0, 14, 0, 0)
+	textLabel4.BackgroundTransparency = 1
+	textLabel4.TextXAlignment = Enum.TextXAlignment.Left
+	textLabel4.Text = text
+	textLabel4.Font = Enum.Font.GothamSemibold
+	textLabel4.TextSize = 13
+	textLabel4.TextColor3 = tbl.White
+	textLabel4.Parent = frame9
+	local textBox = Instance.new("TextBox")
+	textBox.Size = UDim2.new(0, 34, 0, 26)
+	textBox.Position = UDim2.new(1, -50, 0.5, -13)
+	textBox.BackgroundColor3 = tbl.Off
+	textBox.Text = tostring(tbl2[arg])
+	textBox.Font = Enum.Font.GothamBold
+	textBox.TextSize = 13
+	textBox.TextColor3 = tbl.White
+	textBox.ClearTextOnFocus = false
+	textBox.Parent = frame9
+	Instance.new("UICorner", textBox).CornerRadius = UDim.new(0, 5)
+
+	textBox.FocusLost:Connect(function()
+		local num = tonumber(textBox.Text)
+
+		if num and num > 0 then
+			tbl2[arg] = math.floor(num)
+		else
+			textBox.Text = tostring(tbl2[arg])
+		end
+	end)
+end
+
+local function fn8(parent, text)
+	local frame9 = Instance.new("Frame")
+	frame9.Size = UDim2.new(1, 0, 0, 42)
+	frame9.BackgroundColor3 = tbl.BgCard
+	frame9.Parent = parent
+	Instance.new("UICorner", frame9).CornerRadius = UDim.new(0, 8)
+	local textLabel4 = Instance.new("TextLabel")
+	textLabel4.Size = UDim2.new(1, -95, 1, 0)
+	textLabel4.Position = UDim2.new(0, 14, 0, 0)
+	textLabel4.BackgroundTransparency = 1
+	textLabel4.TextXAlignment = Enum.TextXAlignment.Left
+	textLabel4.Text = text
+	textLabel4.Font = Enum.Font.GothamSemibold
+	textLabel4.TextSize = 13
+	textLabel4.TextColor3 = tbl.White
+	textLabel4.Parent = frame9
+	local textButton4 = Instance.new("TextButton")
+	textButton4.Size = UDim2.new(0, 80, 0, 26)
+	textButton4.Position = UDim2.new(1, -96, 0.5, -13)
+	textButton4.BackgroundColor3 = tbl.Off
+	textButton4.Text = tostring(tbl2.ToggleKey)
+	textButton4.Font = Enum.Font.GothamBold
+	textButton4.TextSize = 11
+	textButton4.TextColor3 = tbl.Accent2
+	textButton4.Parent = frame9
+	Instance.new("UICorner", textButton4).CornerRadius = UDim.new(0, 5)
+	local connection = nil
+
+	textButton4.MouseButton1Click:Connect(function()
+		textButton4.Text = "..."
+
+		if connection then
+			connection:Disconnect()
+		end
+
+		connection = UserInputService.InputBegan:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.Keyboard then
+				tbl2.ToggleKey = input.KeyCode.Name
+				textButton4.Text = input.KeyCode.Name
+				textLabel3.Text = input.KeyCode.Name .. " = Toggle"
+				connection:Disconnect()
+				connection = nil
+			end
+		end)
+	end)
+end
+
+local function fn9(text, parent)
+	local textLabel4 = Instance.new("TextLabel")
+	textLabel4.Size = UDim2.new(1, 0, 0, 20)
+	textLabel4.BackgroundTransparency = 1
+	textLabel4.Text = text
+	textLabel4.TextXAlignment = Enum.TextXAlignment.Left
+	textLabel4.Font = Enum.Font.GothamBold
+	textLabel4.TextSize = 11
+	textLabel4.TextColor3 = tbl.Accent2
+	textLabel4.Parent = parent
+end
+
+local function fn10(parent, text, arg)
+	local frame9 = Instance.new("Frame")
+	frame9.Size = UDim2.new(1, 0, 0, 42)
+	frame9.BackgroundColor3 = tbl.BgCardHover
+	frame9.Parent = parent
+	Instance.new("UICorner", frame9).CornerRadius = UDim.new(0, 8)
+	local textButton4 = Instance.new("TextButton")
+	textButton4.Size = UDim2.new(1, 0, 1, 0)
+	textButton4.BackgroundTransparency = 1
+	textButton4.Text = text
+	textButton4.Font = Enum.Font.GothamBold
+	textButton4.TextSize = 13
+	textButton4.TextColor3 = tbl.White
+	textButton4.Parent = frame9
+
+	textButton4.MouseButton1Click:Connect(function()
+		arg(textButton4)
+	end)
+end
+
+fn9("-- UI SETTINGS", scrollingFrame)
+fn8(scrollingFrame, "Toggle GUI Keybind")
+local frame9 = Instance.new("Frame", scrollingFrame)
+frame9.Size = UDim2.new(1, 0, 0, 4)
+frame9.BackgroundTransparency = 1
+fn9("-- FILTERS", scrollingFrame)
+fn6(scrollingFrame, "Receive Midlights", "Midlights")
+fn6(scrollingFrame, "Receive Highlights", "Highlights")
+local frame10 = Instance.new("Frame", scrollingFrame)
+frame10.Size = UDim2.new(1, 0, 0, 4)
+frame10.BackgroundTransparency = 1
+fn9("-- NOTIFICATIONS", scrollingFrame)
+fn6(scrollingFrame, "Play Sound on New Log", "PlaySound")
+local frame11 = Instance.new("Frame", scrollingFrame)
+frame11.Size = UDim2.new(1, 0, 0, 4)
+frame11.BackgroundTransparency = 1
+fn9("-- JOIN SETTINGS", scrollingFrame)
+fn7(scrollingFrame, "Join Spam Retries", "AutoJoinRetries")
+local frame12 = Instance.new("Frame", scrollingFrame)
+frame12.Size = UDim2.new(1, 0, 0, 4)
+frame12.BackgroundTransparency = 1
+fn9("-- DATA", scrollingFrame)
+
+fn10(scrollingFrame, "Save All Settings", function(arg)
+	local text = arg.Text
+	arg.Text = "Saving..."
+
+	pcall(function()
+		if writefile then
+			writefile("HydraNotifier_Config.json", HttpService:JSONEncode(tbl2))
+		end
+	end)
+
+	task.delay(0.5, function()
+		arg.Text = "Saved!"
+
+		task.delay(1, function()
+			arg.Text = text
+		end)
+	end)
+end)
+
+local frame13 = Instance.new("Frame")
+frame13.Size = UDim2.new(1, 0, 0, 55)
+frame13.BackgroundTransparency = 1
+frame13.Parent = frame6
+local frame14 = Instance.new("Frame")
+frame14.Size = UDim2.new(1, -95, 0, 36)
+frame14.Position = UDim2.new(0, 15, 0, 10)
+frame14.BackgroundColor3 = tbl.BgCard
+frame14.Parent = frame13
+Instance.new("UICorner", frame14).CornerRadius = UDim.new(0, 8)
+local uiStroke5 = Instance.new("UIStroke")
+uiStroke5.Color = tbl.Off
+uiStroke5.Thickness = 1
+uiStroke5.Parent = frame14
+local frame15 = Instance.new("Frame")
+frame15.Size = UDim2.new(0, 8, 0, 8)
+frame15.Position = UDim2.new(0, 12, 0.5, -4)
+frame15.BackgroundColor3 = tbl.Off
+frame15.Parent = frame14
+Instance.new("UICorner", frame15).CornerRadius = UDim.new(1, 0)
+local textLabel4 = Instance.new("TextLabel")
+textLabel4.Size = UDim2.new(0, 150, 1, 0)
+textLabel4.Position = UDim2.new(0, 28, 0, 0)
+textLabel4.BackgroundTransparency = 1
+textLabel4.Text = "AutoJoin"
+textLabel4.Font = Enum.Font.GothamBold
+textLabel4.TextXAlignment = Enum.TextXAlignment.Left
+textLabel4.TextSize = 13
+textLabel4.TextColor3 = tbl.White
+textLabel4.Parent = frame14
+local textLabel5 = Instance.new("TextLabel")
+textLabel5.Size = UDim2.new(0, 120, 1, 0)
+textLabel5.Position = UDim2.new(0, 170, 0, 0)
+textLabel5.BackgroundTransparency = 1
+textLabel5.Text = ""
+textLabel5.Font = Enum.Font.GothamBold
+textLabel5.TextXAlignment = Enum.TextXAlignment.Left
+textLabel5.TextSize = 12
+textLabel5.TextColor3 = tbl.Green
+textLabel5.Parent = frame14
+local textButton4 = Instance.new("TextButton")
+textButton4.Size = UDim2.new(0, 42, 0, 22)
+textButton4.Position = UDim2.new(1, -56, 0.5, -11)
+textButton4.BackgroundColor3 = tbl2.AutoJoin and tbl.Accent1 or tbl.Off
+textButton4.Text = ""
+textButton4.Parent = frame14
+Instance.new("UICorner", textButton4).CornerRadius = UDim.new(1, 0)
+local frame16 = Instance.new("Frame")
+frame16.Size = UDim2.new(0, 16, 0, 16)
+frame16.Position = tbl2.AutoJoin and UDim2.new(1, -19, 0, 3) or UDim2.new(0, 3, 0, 3)
+frame16.BackgroundColor3 = tbl.White
+frame16.Parent = textButton4
+Instance.new("UICorner", frame16).CornerRadius = UDim.new(1, 0)
+
+local function fn11(arg)
+	TweenService:Create(frame16, TweenInfo.new(0.15, Enum.EasingStyle.Quad), { Position = arg and UDim2.new(1, -19, 0, 3) or UDim2.new(0, 3, 0, 3) }):Play()
+	TweenService:Create(textButton4, TweenInfo.new(0.15), { BackgroundColor3 = arg and tbl.Accent1 or tbl.Off }):Play()
+	TweenService:Create(frame15, TweenInfo.new(0.2), { BackgroundColor3 = arg and tbl.Green or tbl.Off }):Play()
+	TweenService:Create(uiStroke5, TweenInfo.new(0.2), { Color = arg and tbl.Accent1 or tbl.Off }):Play()
+	textLabel5.Text = arg and "Waiting for logs..." or ""
+	textLabel5.TextColor3 = tbl.TextDim
+end
+
+textButton4.MouseButton1Click:Connect(function()
+	tbl2.AutoJoin = not tbl2.AutoJoin
+	fn11(tbl2.AutoJoin)
+end)
+
+local scrollingFrame2 = Instance.new("ScrollingFrame")
+scrollingFrame2.Size = UDim2.new(1, 0, 1, -55)
+scrollingFrame2.Position = UDim2.new(0, 0, 0, 52)
+scrollingFrame2.BackgroundTransparency = 1
+scrollingFrame2.BorderSizePixel = 0
+scrollingFrame2.ScrollBarThickness = 2
+scrollingFrame2.ScrollBarImageColor3 = tbl.Off
+scrollingFrame2.Parent = frame6
+local uiListLayout2 = Instance.new("UIListLayout")
+uiListLayout2.Parent = scrollingFrame2
+uiListLayout2.Padding = UDim.new(0, 6)
+uiListLayout2.SortOrder = Enum.SortOrder.LayoutOrder
+local uiPadding2 = Instance.new("UIPadding")
+uiPadding2.PaddingLeft = UDim.new(0, 15)
+uiPadding2.PaddingRight = UDim.new(0, 15)
+uiPadding2.PaddingTop = UDim.new(0, 4)
+uiPadding2.Parent = scrollingFrame2
+
+uiListLayout2:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+	scrollingFrame2.CanvasSize = UDim2.new(0, 0, 0, uiListLayout2.AbsoluteContentSize.Y + 10)
+end)
+
+local frame17 = Instance.new("Frame")
+frame17.Size = UDim2.new(1, 0, 0, 55)
+frame17.BackgroundTransparency = 1
+frame17.Parent = frame8
+local frame18 = Instance.new("Frame")
+frame18.Size = UDim2.new(1, -95, 0, 36)
+frame18.Position = UDim2.new(0, 15, 0, 10)
+frame18.BackgroundColor3 = tbl.BgCard
+frame18.Parent = frame17
+Instance.new("UICorner", frame18).CornerRadius = UDim.new(0, 8)
+local uiStroke6 = Instance.new("UIStroke")
+uiStroke6.Color = tbl.Off
+uiStroke6.Thickness = 1
+uiStroke6.Parent = frame18
+local textLabel6 = Instance.new("TextLabel")
+textLabel6.Size = UDim2.new(0, 90, 1, 0)
+textLabel6.Position = UDim2.new(0, 14, 0, 0)
+textLabel6.BackgroundTransparency = 1
+textLabel6.Text = "Use Whitelist"
+textLabel6.Font = Enum.Font.GothamBold
+textLabel6.TextXAlignment = Enum.TextXAlignment.Left
+textLabel6.TextSize = 12
+textLabel6.TextColor3 = tbl.White
+textLabel6.Parent = frame18
+local textButton5 = Instance.new("TextButton")
+textButton5.Size = UDim2.new(0, 32, 0, 18)
+textButton5.Position = UDim2.new(0, 106, 0.5, -9)
+textButton5.BackgroundColor3 = tbl2.UseWhitelist and tbl.Accent1 or tbl.Off
+textButton5.Text = ""
+textButton5.Parent = frame18
+Instance.new("UICorner", textButton5).CornerRadius = UDim.new(1, 0)
+local frame19 = Instance.new("Frame")
+frame19.Size = UDim2.new(0, 12, 0, 12)
+frame19.Position = tbl2.UseWhitelist and UDim2.new(1, -15, 0, 3) or UDim2.new(0, 3, 0, 3)
+frame19.BackgroundColor3 = tbl.White
+frame19.Parent = textButton5
+Instance.new("UICorner", frame19).CornerRadius = UDim.new(1, 0)
+
+textButton5.MouseButton1Click:Connect(function()
+	tbl2.UseWhitelist = not tbl2.UseWhitelist
+	local useWhitelist = tbl2.UseWhitelist
+	TweenService:Create(frame19, TweenInfo.new(0.15, Enum.EasingStyle.Quad), { Position = useWhitelist and UDim2.new(1, -15, 0, 3) or UDim2.new(0, 3, 0, 3) }):Play()
+	TweenService:Create(textButton5, TweenInfo.new(0.15), { BackgroundColor3 = useWhitelist and tbl.Accent1 or tbl.Off }):Play()
+	TweenService:Create(uiStroke6, TweenInfo.new(0.2), { Color = useWhitelist and tbl.Accent1 or tbl.Off }):Play()
+end)
+
+local textButton6 = Instance.new("TextButton")
+textButton6.Size = UDim2.new(0, 30, 0, 20)
+textButton6.Position = UDim2.new(0, 146, 0.5, -10)
+textButton6.BackgroundColor3 = tbl.GreenDim
+textButton6.Text = "All"
+textButton6.Font = Enum.Font.GothamBold
+textButton6.TextSize = 10
+textButton6.TextColor3 = tbl.Green
+textButton6.Parent = frame18
+Instance.new("UICorner", textButton6).CornerRadius = UDim.new(0, 4)
+local textButton7 = Instance.new("TextButton")
+textButton7.Size = UDim2.new(0, 40, 0, 20)
+textButton7.Position = UDim2.new(0, 180, 0.5, -10)
+textButton7.BackgroundColor3 = Color3.fromRGB(60, 25, 25)
+textButton7.Text = "None"
+textButton7.Font = Enum.Font.GothamBold
+textButton7.TextSize = 10
+textButton7.TextColor3 = tbl.HighlightC
+textButton7.Parent = frame18
+Instance.new("UICorner", textButton7).CornerRadius = UDim.new(0, 4)
+local textBox = Instance.new("TextBox")
+textBox.Size = UDim2.new(0, 95, 0, 24)
+textBox.Position = UDim2.new(1, -105, 0.5, -12)
+textBox.BackgroundColor3 = tbl.BgDark
+textBox.Text = ""
+textBox.PlaceholderText = "Search..."
+textBox.Font = Enum.Font.Gotham
+textBox.TextSize = 11
+textBox.TextColor3 = tbl.White
+textBox.Parent = frame18
+Instance.new("UICorner", textBox).CornerRadius = UDim.new(0, 5)
+local scrollingFrame3 = Instance.new("ScrollingFrame")
+scrollingFrame3.Size = UDim2.new(1, 0, 1, -55)
+scrollingFrame3.Position = UDim2.new(0, 0, 0, 52)
+scrollingFrame3.BackgroundTransparency = 1
+scrollingFrame3.BorderSizePixel = 0
+scrollingFrame3.ScrollBarThickness = 2
+scrollingFrame3.ScrollBarImageColor3 = tbl.Off
+scrollingFrame3.Parent = frame8
+local uiListLayout3 = Instance.new("UIListLayout")
+uiListLayout3.Parent = scrollingFrame3
+uiListLayout3.Padding = UDim.new(0, 5)
+local uiPadding3 = Instance.new("UIPadding")
+uiPadding3.PaddingLeft = UDim.new(0, 15)
+uiPadding3.PaddingRight = UDim.new(0, 15)
+uiPadding3.PaddingTop = UDim.new(0, 4)
+uiPadding3.Parent = scrollingFrame3
+
+uiListLayout3:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+	scrollingFrame3.CanvasSize = UDim2.new(0, 0, 0, uiListLayout3.AbsoluteContentSize.Y + 10)
+end)
+
+local tbl6 = {}
+
+local function fn12(text)
+	local frame20 = Instance.new("Frame")
+	frame20.Size = UDim2.new(1, 0, 0, 34)
+	frame20.BackgroundColor3 = tbl.BgCard
+	Instance.new("UICorner", frame20).CornerRadius = UDim.new(0, 6)
+	local textLabel7 = Instance.new("TextLabel")
+	textLabel7.Size = UDim2.new(1, -60, 1, 0)
+	textLabel7.Position = UDim2.new(0, 12, 0, 0)
+	textLabel7.BackgroundTransparency = 1
+	textLabel7.TextXAlignment = Enum.TextXAlignment.Left
+	textLabel7.Text = text
+	textLabel7.Font = Enum.Font.GothamSemibold
+	textLabel7.TextSize = 12
+	textLabel7.TextColor3 = tbl.White
+	textLabel7.Parent = frame20
+	local textButton8 = Instance.new("TextButton")
+	textButton8.Size = UDim2.new(0, 32, 0, 18)
+	textButton8.Position = UDim2.new(1, -44, 0.5, -9)
+	textButton8.BackgroundColor3 = tbl2.Whitelist[text] and tbl.Accent1 or tbl.Off
+	textButton8.Text = ""
+	textButton8.Parent = frame20
+	Instance.new("UICorner", textButton8).CornerRadius = UDim.new(1, 0)
+	local frame21 = Instance.new("Frame")
+	frame21.Size = UDim2.new(0, 12, 0, 12)
+	frame21.Position = tbl2.Whitelist[text] and UDim2.new(1, -15, 0, 3) or UDim2.new(0, 3, 0, 3)
+	frame21.BackgroundColor3 = tbl.White
+	frame21.Parent = textButton8
+	Instance.new("UICorner", frame21).CornerRadius = UDim.new(1, 0)
+
+	local function fn13(backgroundColor3, arg)
+		if arg then
+			TweenService:Create(frame21, TweenInfo.new(0.15), { Position = backgroundColor3 and UDim2.new(1, -15, 0, 3) or UDim2.new(0, 3, 0, 3) }):Play()
+			local v6 = TweenService
+			local create = v6.Create
+			local tweenInfo = TweenInfo.new(0.15)
+			local tbl7 = {}
+			backgroundColor3 = backgroundColor3 and tbl.Accent1
+			tbl7.BackgroundColor3 = backgroundColor3 or tbl.Off
+			create(v6, textButton8, tweenInfo, tbl7):Play()
+		else
+			frame21.Position = backgroundColor3 and UDim2.new(1, -15, 0, 3) or UDim2.new(0, 3, 0, 3)
+			textButton8.BackgroundColor3 = backgroundColor3 and tbl.Accent1 or tbl.Off
+		end
+	end
+
+	textButton8.MouseButton1Click:Connect(function()
+		tbl2.Whitelist[text] = not tbl2.Whitelist[text]
+		fn13(tbl2.Whitelist[text], true)
+	end)
+
+	frame20.Parent = scrollingFrame3
+	return { frame = frame20, name = string.lower(text), rawName = text, update = fn13 }
+end
+
+for _, v6 in ipairs(tbl3) do
+	local insert = table.insert
+	local v7 = fn12(v6)
+	insert(tbl6, v7)
+end
+
+textBox.Changed:Connect(function(arg)
+	if arg == "Text" then
+		local v6 = string.lower(textBox.Text)
+
+		for _, v7 in ipairs(tbl6) do
+			v7.frame.Visible = (v6 == "" or string.find(v7.name, v6, 1, true)) and true or false
+		end
+	end
+end)
+
+textButton6.MouseButton1Click:Connect(function()
+	for _, v6 in ipairs(tbl6) do
+		if v6.frame.Visible then
+			tbl2.Whitelist[v6.rawName] = true
+			v6.update(true, true)
+		end
+	end
+end)
+
+textButton7.MouseButton1Click:Connect(function()
+	for _, v6 in ipairs(tbl6) do
+		if v6.frame.Visible then
+			tbl2.Whitelist[v6.rawName] = false
+			v6.update(false, true)
+		end
+	end
+end)
+
+local flag4 = false
+local n = 0
+local n2 = 5
+
+local function fn13(arg)
+	if flag4 then
+		return
+	end
+
+	if os.time() - n < n2 then
+		return
+	end
+	flag4 = true
+	n = os.time()
+	textLabel5.Text = "Joining..."
+	textLabel5.TextColor3 = tbl.Green
+
+	task.spawn(function()
+		local tbl7 = { "Joining.", "Joining..", "Joining..." }
+		local n3 = 1
+
+		while flag4 and _G.HydraRunning do
+			textLabel5.Text = tbl7[n3]
+			n3 = n3 % 3 + 1
+			task.wait(0.4)
+		end
+	end)
+
+	task.spawn(function()
+		local n3 = tonumber(tbl2.AutoJoinRetries) or 3
+
+		for i = 1, n3 do
+			if _G.HydraRunning then
+				pcall(function()
+					TeleportService:TeleportToPlaceInstance(game.PlaceId, arg, localPlayer)
+				end)
+
+				task.wait(3)
+				continue
+			end
+
+			break
+		end
+
+		flag4 = false
+
+		if tbl2.AutoJoin then
+			textLabel5.Text = "Waiting for logs..."
+			textLabel5.TextColor3 = tbl.TextDim
+		else
+			textLabel5.Text = ""
+		end
+	end)
+end
+
+local n3 = 180
+local tbl7 = {}
+
+local function fn14(arg)
+	local flag5 = arg.tier == "Highlights"
+	local now = os.time()
+	if arg.timestamp and now - arg.timestamp > n3 then
+		return
+	end
+	local frame20 = Instance.new("Frame")
+	frame20.Size = UDim2.new(1, 0, 0, 52)
+	frame20.BackgroundColor3 = tbl.BgCard
+	frame20.LayoutOrder = -now
+	Instance.new("UICorner", frame20).CornerRadius = UDim.new(0, 8)
+	local frame21 = Instance.new("Frame")
+	frame21.Size = UDim2.new(0, 3, 0.65, 0)
+	frame21.Position = UDim2.new(0, 0, 0.175, 0)
+	frame21.BackgroundColor3 = flag5 and tbl.HighlightC or tbl.MidlightC
+	frame21.Parent = frame20
+	Instance.new("UICorner", frame21).CornerRadius = UDim.new(1, 0)
+
+	if flag5 then
+		local uiStroke7 = Instance.new("UIStroke")
+		uiStroke7.Thickness = 1
+		uiStroke7.Color = tbl.HighlightC
+		uiStroke7.Transparency = 0.6
+		uiStroke7.Parent = frame20
+	end
+
+	local textLabel7 = Instance.new("TextLabel")
+	textLabel7.Size = UDim2.new(1, -135, 0, 18)
+	textLabel7.Position = UDim2.new(0, 12, 0, 7)
+	textLabel7.BackgroundTransparency = 1
+	textLabel7.TextXAlignment = Enum.TextXAlignment.Left
+	textLabel7.TextTruncate = Enum.TextTruncate.AtEnd
+	textLabel7.Text = arg.name or "Unknown"
+	textLabel7.Font = Enum.Font.GothamBold
+	textLabel7.TextSize = 13
+	textLabel7.TextColor3 = tbl.White
+	textLabel7.Parent = frame20
+	local textLabel8 = Instance.new("TextLabel")
+	textLabel8.Size = UDim2.new(1, -135, 0, 14)
+	textLabel8.Position = UDim2.new(0, 12, 0, 28)
+	textLabel8.BackgroundTransparency = 1
+	textLabel8.TextXAlignment = Enum.TextXAlignment.Left
+	local str2 = fn2(arg.value or 0) .. "  /  " .. (arg.tier or "")
+	textLabel8.Text = str2 .. "  /  0s ago"
+	textLabel8.Font = Enum.Font.Gotham
+	textLabel8.TextSize = 11
+	textLabel8.TextColor3 = flag5 and tbl.HighlightC or tbl.MidlightC
+	textLabel8.Parent = frame20
+	table.insert(tbl7, { label = textLabel8, baseStr = str2, ts = arg.timestamp or now, card = frame20 })
+	local textButton8 = Instance.new("TextButton")
+	textButton8.Size = UDim2.new(0, 48, 0, 26)
+	textButton8.Position = UDim2.new(1, -110, 0.5, -13)
+	textButton8.BackgroundColor3 = Color3.fromRGB(141, 48, 233)
+	textButton8.Text = "JOIN"
+	textButton8.Font = Enum.Font.GothamBold
+	textButton8.TextSize = 10
+	textButton8.TextColor3 = Color3.fromRGB(255, 255, 255)
+	textButton8.Parent = frame20
+	Instance.new("UICorner", textButton8).CornerRadius = UDim.new(0, 5)
+	local textButton9 = Instance.new("TextButton")
+	textButton9.Size = UDim2.new(0, 48, 0, 26)
+	textButton9.Position = UDim2.new(1, -58, 0.5, -13)
+	textButton9.BackgroundColor3 = Color3.fromRGB(74, 38, 112)
+	textButton9.Text = "SPAM"
+	textButton9.Font = Enum.Font.GothamBold
+	textButton9.TextSize = 10
+	textButton9.TextColor3 = tbl.White
+	textButton9.Parent = frame20
+	Instance.new("UICorner", textButton9).CornerRadius = UDim.new(0, 5)
+	frame20.Parent = scrollingFrame2
+
+	textButton8.MouseButton1Click:Connect(function()
+		if arg.job_id then
+			pcall(function()
+				TeleportService:TeleportToPlaceInstance(game.PlaceId, arg.job_id, localPlayer)
+			end)
+
+			textButton8.Text = "..."
+			textButton8.BackgroundColor3 = tbl.Accent1
+
+			task.delay(1.5, function()
+				textButton8.Text = "JOIN"
+				textButton8.BackgroundColor3 = tbl.Accent1
+			end)
+		end
+	end)
+
+	textButton9.MouseButton1Click:Connect(function()
+		if arg.job_id then
+			fn13(arg.job_id)
+		end
+	end)
+end
+
+local frame20 = Instance.new("Frame")
+frame20.Name = "NotifContainer"
+frame20.Size = UDim2.new(0, 260, 1, -40)
+frame20.Position = UDim2.new(1, -280, 0, 20)
+frame20.BackgroundTransparency = 1
+frame20.Parent = screenGui
+local uiListLayout4 = Instance.new("UIListLayout")
+uiListLayout4.Parent = frame20
+uiListLayout4.SortOrder = Enum.SortOrder.LayoutOrder
+uiListLayout4.VerticalAlignment = Enum.VerticalAlignment.Bottom
+uiListLayout4.Padding = UDim.new(0, 8)
+
+local function fn15(arg)
+	fn()
+	local flag5 = arg.tier == "Highlights"
+	local textButton8 = Instance.new("TextButton")
+	textButton8.Size = UDim2.new(1, 0, 0, 52)
+	textButton8.BackgroundColor3 = tbl.BgMid
+	textButton8.BackgroundTransparency = 1
+	textButton8.Text = ""
+	textButton8.AutoButtonColor = false
+	Instance.new("UICorner", textButton8).CornerRadius = UDim.new(0, 8)
+	local uiStroke7 = Instance.new("UIStroke")
+	uiStroke7.Thickness = 1
+	uiStroke7.Color = flag5 and tbl.HighlightC or tbl.MidlightC
+	uiStroke7.Transparency = 1
+	uiStroke7.Parent = textButton8
+	local frame21 = Instance.new("Frame")
+	frame21.Size = UDim2.new(0, 3, 0.65, 0)
+	frame21.Position = UDim2.new(0, 6, 0.175, 0)
+	frame21.BackgroundColor3 = flag5 and tbl.HighlightC or tbl.MidlightC
+	frame21.BackgroundTransparency = 1
+	frame21.Parent = textButton8
+	Instance.new("UICorner", frame21).CornerRadius = UDim.new(1, 0)
+	local textLabel7 = Instance.new("TextLabel")
+	textLabel7.Size = UDim2.new(1, -85, 0, 16)
+	textLabel7.Position = UDim2.new(0, 16, 0, 8)
+	textLabel7.BackgroundTransparency = 1
+	textLabel7.TextXAlignment = Enum.TextXAlignment.Left
+	textLabel7.TextTruncate = Enum.TextTruncate.AtEnd
+	textLabel7.Text = arg.name or "Unknown"
+	textLabel7.Font = Enum.Font.GothamBold
+	textLabel7.TextSize = 12
+	textLabel7.TextColor3 = tbl.White
+	textLabel7.TextTransparency = 1
+	textLabel7.Parent = textButton8
+	textLabel7.ZIndex = 2
+	local textLabel8 = Instance.new("TextLabel")
+	textLabel8.Size = UDim2.new(1, -85, 0, 14)
+	textLabel8.Position = UDim2.new(0, 16, 0, 27)
+	textLabel8.BackgroundTransparency = 1
+	textLabel8.TextXAlignment = Enum.TextXAlignment.Left
+	local n4 = math.floor(os.time())
+	local n5 = math.max(0, n4 - (arg.timestamp or n4))
+	local str2 = n5 < 60 and n5 .. "s ago" or math.floor(n5 / 60) .. "m ago"
+	textLabel8.Text = fn2(arg.value or 0) .. "  /  " .. (arg.tier or "") .. "  /  " .. str2
+	textLabel8.Font = Enum.Font.Gotham
+	textLabel8.TextSize = 10
+	textLabel8.TextColor3 = tbl.TextDim
+	textLabel8.TextTransparency = 1
+	textLabel8.Parent = textButton8
+	textLabel8.ZIndex = 2
+	local textButton9 = Instance.new("TextButton")
+	textButton9.Size = UDim2.new(0, 44, 0, 22)
+	textButton9.Position = UDim2.new(1, -54, 0.5, -11)
+	textButton9.BackgroundColor3 = tbl.Accent1
+	textButton9.BackgroundTransparency = 1
+	textButton9.Text = "JOIN"
+	textButton9.Font = Enum.Font.GothamBold
+	textButton9.TextSize = 10
+	textButton9.TextColor3 = tbl.Accent2
+	textButton9.TextTransparency = 1
+	textButton9.AutoButtonColor = false
+	textButton9.Parent = textButton8
+	textButton9.ZIndex = 2
+	Instance.new("UICorner", textButton9).CornerRadius = UDim.new(0, 5)
+	textButton8.Parent = frame20
+
+	local function fn16()
+		if arg.job_id then
+			pcall(function()
+				TeleportService:TeleportToPlaceInstance(game.PlaceId, arg.job_id, localPlayer)
+			end)
+
+			textButton9.Text = "..."
+		end
+	end
+
+	textButton8.MouseButton1Click:Connect(fn16)
+	textButton9.MouseButton1Click:Connect(fn16)
+	TweenService:Create(textButton8, TweenInfo.new(0.35, Enum.EasingStyle.Quad), { BackgroundTransparency = 0.05 }):Play()
+	TweenService:Create(uiStroke7, TweenInfo.new(0.35), { Transparency = 0.6 }):Play()
+	TweenService:Create(frame21, TweenInfo.new(0.35), { BackgroundTransparency = 0 }):Play()
+	TweenService:Create(textLabel7, TweenInfo.new(0.35), { TextTransparency = 0 }):Play()
+	TweenService:Create(textLabel8, TweenInfo.new(0.35), { TextTransparency = 0 }):Play()
+	TweenService:Create(textButton9, TweenInfo.new(0.35), { TextTransparency = 0, BackgroundTransparency = 0.15 }):Play()
+
+	task.delay(4.5, function()
+		if textButton8 and textButton8.Parent then
+			TweenService:Create(textButton8, TweenInfo.new(0.3), { BackgroundTransparency = 1 }):Play()
+			TweenService:Create(uiStroke7, TweenInfo.new(0.3), { Transparency = 1 }):Play()
+			TweenService:Create(frame21, TweenInfo.new(0.3), { BackgroundTransparency = 1 }):Play()
+			TweenService:Create(textLabel7, TweenInfo.new(0.3), { TextTransparency = 1 }):Play()
+			TweenService:Create(textLabel8, TweenInfo.new(0.3), { TextTransparency = 1 }):Play()
+			local tween = TweenService:Create(textButton9, TweenInfo.new(0.3), { TextTransparency = 1, BackgroundTransparency = 1 })
+			tween:Play()
+
+			tween.Completed:Connect(function()
+				textButton8:Destroy()
+			end)
+		end
+	end)
+end
+
+espStrokes = espStrokes or {}
+
+local function fn16(character)
+	task.spawn(function()
+		local head = character:WaitForChild("Head", 10)
+		if not head then
+			return
+		end
+
+		if head:FindFirstChild("HYDRA_USER_ESP") then
+			head.HYDRA_USER_ESP:Destroy()
+		end
+
+		local billboardGui = Instance.new("BillboardGui")
+		billboardGui.Name = "HYDRA_USER_ESP"
+		billboardGui.Size = UDim2.new(0, 150, 0, 34)
+		billboardGui.StudsOffset = Vector3.new(0, 2.8, 0)
+		billboardGui.AlwaysOnTop = true
+		billboardGui.Parent = head
+		local frame21 = Instance.new("Frame")
+		frame21.Size = UDim2.new(1, 0, 1, 0)
+		frame21.BackgroundColor3 = Color3.fromRGB(18, 15, 32)
+		frame21.BackgroundTransparency = 0.25
+		frame21.Parent = billboardGui
+		Instance.new("UICorner", frame21).CornerRadius = UDim.new(0, 6)
+		local uiStroke7 = Instance.new("UIStroke")
+		uiStroke7.Thickness = 1.5
+		uiStroke7.Color = tbl.Accent1
+		uiStroke7.Parent = frame21
+		table.insert(espStrokes, uiStroke7)
+		local textLabel7 = Instance.new("TextLabel")
+		textLabel7.Size = UDim2.new(1, 0, 1, 0)
+		textLabel7.BackgroundTransparency = 1
+		textLabel7.Text = "HYDRA USER"
+		textLabel7.Font = Enum.Font.GothamBlack
+		textLabel7.TextSize = 13
+		textLabel7.TextColor3 = tbl.White
+		textLabel7.Parent = frame21
+	end)
+end
+
+if localPlayer.Character then
+	fn16(localPlayer.Character)
+end
+
+localPlayer.CharacterAdded:Connect(fn16)
+
+-- HYDRA USER label is local only; remote user-ID registry removed.
+
+_G.HydraRunning = true
+
+task.spawn(function()
+	while _G.HydraRunning do
+        local n = (math.sin(tick() * 0.75) + 1) * 0.5
+        local color2 = Color3.fromRGB(163 + math.floor(n * 19), 69 + math.floor(n * 12), 245)
+        uiGradient.Rotation = 0
+        uiGradient.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(112, 55, 178)),
+            ColorSequenceKeypoint.new(0.52, color2),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(126, 48, 184))
+        })
+        textLabel.TextColor3 = Color3.fromRGB(246, 229, 255)
+		for k, v9 in pairs(tbl5) do
+			if k == str then
+				v9.ind.BackgroundColor3 = color2
+			end
+		end
+
+		for _, v9 in ipairs(espStrokes) do
+			if v9 and v9.Parent then
+				v9.Color = color2
+			end
+		end
+
+		if tbl2.AutoJoin then
+			frame15.BackgroundColor3 = color2
+		end
+
+		if textButton3 then
+			textButton3.TextColor3 = Color3.fromRGB(255, 255, 255)
+		end
+
+		task.wait(0.04)
+	end
+end)
+
+local str2 = "https://autojoiner2-2d181-default-rtdb.firebaseio.com/logs.json?orderBy=%22%24key%22&limitToLast=30"
+local tbl8 = {}
+local flag5 = true
+local tbl9 = {}
+local n4 = 180
+
+local function fn17(arg)
+	local now = os.time()
+	local tbl10 = {}
+
+	for _, v6 in ipairs(arg) do
+		if not tbl8[v6.id] then
+			tbl8[v6.id] = true
+			table.insert(tbl10, v6)
+		end
+	end
+
+	table.sort(tbl10, function(arg2, arg3)
+		return arg2.timestamp > arg3.timestamp
+	end)
+
+	if flag5 then
+		flag5 = false
+		local n5 = 0
+
+		for _, v6 in ipairs(tbl10) do
+			if not (n5 >= 50) then
+				fn14(v6)
+				n5 += 1
+				continue
+			end
+
+			break
+		end
+
+		return
+	end
+
+	for _, v6 in ipairs(tbl10) do
+		local jobId = v6.job_id
+		local v7 = jobId and tbl9[jobId]
+
+		if v7 and now - v7 < n4 then
+			fn14(v6)
+		else
+			if jobId then
+				tbl9[jobId] = now
+			end
+
+			fn14(v6)
+
+			if tbl2[v6.tier] then
+				fn15(v6)
+
+				if tbl2.AutoJoin and v6.job_id then
+					local flag6 = true
+
+					if tbl2.UseWhitelist then
+						if not v6.base_name or not tbl2.Whitelist[v6.base_name] then
+							flag6 = false
+						end
+					end
+
+					if flag6 then
+						fn13(v6.job_id)
+					end
+				end
+			end
+		end
+	end
+end
+
+task.spawn(function()
+	while _G.HydraRunning do
+		pcall(function()
+			local str3 = str2 .. "&t=" .. tostring(tick())
+			local tbl10 = { ["Cache-Control"] = "no-cache", ["User-Agent"] = "Roblox/HydraJoiner" }
+			local tbl11
+
+			if syn and syn.request then
+				tbl11 = syn.request({ Url = str3, Method = "GET", Headers = tbl10 })
+			elseif request then
+				tbl11 = request({ Url = str3, Method = "GET", Headers = tbl10 })
+			elseif http_request then
+				tbl11 = http_request({ Url = str3, Method = "GET", Headers = tbl10 })
+			else
+				tbl11 = { Body = game:HttpGet(str3, true) }
+			end
+
+			if tbl11 and tbl11.Body then
+				local data = HttpService:JSONDecode(tbl11.Body)
+
+				if data and type(data) == "table" then
+					local tbl12 = {}
+
+					for k, v6 in pairs(data) do
+						if type(v6) == "table" and v6.jobId then
+							local n5 = tonumber(v6.numValue) or 0
+
+							table.insert(tbl12, {
+								id = k,
+								job_id = v6.jobId,
+								name = v6.name ~= "" and v6.name or "Unknown",
+								base_name = v6.name ~= "" and v6.name or "Unknown",
+								value = n5,
+								tier = n5 >= 100000000 and "Highlights" or "Midlights",
+								timestamp = os.time(),
+								players = v6.players or "",
+								place_id = v6.placeId,
+							})
+						end
+					end
+
+					if #tbl12 > 0 then
+						fn17(tbl12)
+					end
+				end
+			end
+		end)
+
+		task.wait(2)
+	end
+end)
+
+task.spawn(function()
+	while _G.HydraRunning do
+		local n5 = math.floor(os.time())
+
+		for i = #tbl7, 1, -1 do
+			local v6 = tbl7[i]
+
+			if not v6.card or not v6.card.Parent then
+				table.remove(tbl7, i)
+			else
+				local n6 = n5 - v6.ts
+
+				if n3 < n6 then
+					if v6.card and v6.card.Parent then
+						v6.card:Destroy()
+					end
+
+					table.remove(tbl7, i)
+				else
+					local str3
+
+					if n6 < 60 then
+						str3 = n6 .. "s ago"
+					elseif n6 < 3600 then
+						str3 = math.floor(n6 / 60) .. "m ago"
+					else
+						str3 = math.floor(n6 / 3600) .. "h ago"
+					end
+
+					v6.label.Text = v6.baseStr .. "  /  " .. str3
+				end
+			end
+		end
+
+		task.wait(1)
+	end
+end)
+
+local tbl10 = {
+	["Hydra Bunny"] = true,
+	["Hydra Dragon Cannelloni"] = true,
+	["Dragon Cannelloni"] = true,
+	Griffin = true,
+	["Dragon Gingerini"] = true,
+	Antonio = true,
+	["Elefanto Frigo"] = true,
+	["Rico Dinero"] = true,
+	Rubrikiko = true,
+	Arcadragon = true,
+	["Pancake and Syrup"] = true,
+	["Kalika Bros"] = true,
+	["Tirilikalika Tirilikalako"] = true,
+	["Globa Steppa"] = true,
+	["Dug Dug Dug"] = true,
+	["La Supreme Combinasion"] = true,
+	["La Casa Boo"] = true,
+	["Dragon Aquanini"] = true,
+	["Signore Carapace"] = true,
+	["Fishino Clownino"] = true,
+	Cerberus = true,
+	["Duggy Bros"] = true,
+	Kraken = true,
+	Venuspino = true,
+	["Gorillo Subwoofero"] = true,
+	["Foxini Lanternini"] = true,
+	["Hopilikalika Hopilikalako"] = true,
+	["Strawberry Elephant"] = true,
+	Meowl = true,
+	["Skibidi Toilet"] = true,
+	["Los Dragons"] = true,
+	["La Craft Machine"] = true,
+	["Gold and Diamond"] = true,
+	["John Pork"] = true,
+	["Headless Horseman"] = true,
+	["Capitano Moby"] = true,
+	["Celestial Pegasus"] = true,
+	["Burguro and Fryuro"] = true,
+	["Fragrama and Chocrama"] = true,
+	["Spooky and Pumpky"] = true,
+	["La Fuse Machine"] = true,
+	Polaroidini = true,
+}
+
+local tbl11 = {
+	Aquatic = true,
+	["Bunny Basket"] = true,
+	Candy = true,
+	Christmas = true,
+	Cursed = true,
+	Cyber = true,
+	Diamond = true,
+	Divine = true,
+	Easter = true,
+	Galaxy = true,
+	Gingerbread = true,
+	Gold = true,
+	Halloween = true,
+	Lava = true,
+	Lucky = true,
+	Octo = true,
+	["Pot of Gold"] = true,
+	Radioactive = true,
+	Rainbow = true,
+	Rose = true,
+	Summer = true,
+	Taco = true,
+	Valentines = true,
+	["Yin Yang"] = true,
+	Tralalero = true,
+}
+
+local tbl12 = {
+	["Alien Slap"] = true,
+	["Blackhole Bomb"] = true,
+	["Bloodmoon Hammer"] = true,
+	["Bloodmoon Slap"] = true,
+	["Candy Sentry"] = true,
+	["Candy Slap"] = true,
+	["Cupid's Wings"] = true,
+	["Cursed Slap"] = true,
+	["Cyber Slap"] = true,
+	["Demon's Head"] = true,
+	["Divine Slap"] = true,
+	["Lava Blaster"] = true,
+	["Lava Slap"] = true,
+	["Radioactive Airstrike"] = true,
+	["Radioactive Slap"] = true,
+	["Rainbow Hammer"] = true,
+	["Rainbow Slap"] = true,
+	["Santa's Sleigh"] = true,
+	Waverider = true,
+	["Witch's Broom"] = true,
+	["Yin Yang Lamp"] = true,
+	["Yin Yang Slap"] = true,
+	["Phantom Slap"] = true,
+	["Crystal Slap"] = true,
+}
+
+-- External third-party loader disabled for safety.
+-- Review the original source and its Discord webhook before enabling.
+
+
+
+
+-- ============================================================================
+-- HYDRA JOINER // REFINE V5
+-- One coherent design layer. Native Roblox widgets only; no rbxassetid images.
+-- Existing join / spam / autojoin / settings / whitelist / notifications retained.
+-- ============================================================================
+local P = {
+    night = Color3.fromRGB(11, 8, 24),
+    sidebar = Color3.fromRGB(14, 9, 30),
+    inset = Color3.fromRGB(25, 14, 48),
+    card = Color3.fromRGB(32, 18, 57),
+    cardHover = Color3.fromRGB(43, 23, 74),
+    line = Color3.fromRGB(118, 63, 174),
+    neon = Color3.fromRGB(189, 82, 255),
+    pink = Color3.fromRGB(237, 98, 247),
+    white = Color3.fromRGB(251, 246, 255),
+    subtle = Color3.fromRGB(176, 154, 205),
+}
+local function corner(object, px)
+    local c = object:FindFirstChildOfClass("UICorner") or Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, px)
+    c.Parent = object
+    return c
+end
+local function outline(object, color, transparency, width)
+    local st = object:FindFirstChildOfClass("UIStroke") or Instance.new("UIStroke")
+    st.Color = color
+    st.Transparency = transparency
+    st.Thickness = width or 1
+    st.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    st.Parent = object
+    return st
+end
+local function fill(object, a, b, angle)
+    local gradient = object:FindFirstChildOfClass("UIGradient") or Instance.new("UIGradient")
+    object.BackgroundColor3 = Color3.fromRGB(255,255,255)
+    gradient.Color = ColorSequence.new(a, b)
+    gradient.Rotation = angle or 0
+    gradient.Parent = object
+    return gradient
+end
+local function label(name, text, parent, pos, size, font, pts, color)
+    local l = Instance.new("TextLabel")
+    l.Name = name
+    l.BackgroundTransparency = 1
+    l.Text = text
+    l.Position = pos
+    l.Size = size
+    l.Font = font
+    l.TextSize = pts
+    l.TextColor3 = color
+    l.TextXAlignment = Enum.TextXAlignment.Left
+    l.TextYAlignment = Enum.TextYAlignment.Center
+    l.ZIndex = 5
+    l.Parent = parent
+    return l
+end
+local function pill(parent, name, pos, size, col)
+    local item = Instance.new("Frame")
+    item.Name = name
+    item.Position = pos
+    item.Size = size
+    item.BackgroundColor3 = col
+    item.BorderSizePixel = 0
+    item.ZIndex = 3
+    item.Parent = parent
+    corner(item, 12)
+    return item
+end
+
+-- Crisp root outline; no stacked old neon frames that cover the sidebar.
+frame.BackgroundColor3 = P.night
+frame.BackgroundTransparency = 0
+frame.ClipsDescendants = true
+corner(frame, 17)
+uiStroke.Color = P.neon
+uiStroke.Transparency = 0.28
+uiStroke.Thickness = 1.25
+uiGradient.Rotation = 0
+frame2.BackgroundColor3 = P.sidebar
+frame2.BackgroundTransparency = 0
+frame2.Size = UDim2.new(0, 186, 1, 0)
+corner(frame2, 17)
+frame3.BackgroundColor3 = P.sidebar
+frame3.BackgroundTransparency = 0
+frame3.Size = UDim2.new(0, 18, 1, 0)
+frame3.Position = UDim2.new(1, -18, 0, 0)
+frame4.BackgroundColor3 = P.line
+frame4.BackgroundTransparency = 0.65
+frame4.Size = UDim2.new(0, 1, 1, -34)
+frame4.Position = UDim2.new(1, -1, 0, 17)
+background.BackgroundTransparency = 1
+atmosphericGlow.BackgroundTransparency = 1
+
+-- Spacious logo that is actually visible inside the sidebar.
+textLabel.Text = "HYDRA"
+textLabel.Position = UDim2.fromOffset(22, 30)
+textLabel.Size = UDim2.fromOffset(154, 32)
+textLabel.Font = Enum.Font.GothamBlack
+textLabel.TextSize = 29
+textLabel.TextColor3 = P.white
+textLabel.TextStrokeTransparency = 1
+textLabel.TextXAlignment = Enum.TextXAlignment.Left
+textLabel.ZIndex = 4
+textLabel2.Text = "J O I N E R"
+textLabel2.Position = UDim2.fromOffset(24, 63)
+textLabel2.Size = UDim2.fromOffset(152, 16)
+textLabel2.TextColor3 = P.pink
+textLabel2.TextSize = 11
+textLabel2.TextXAlignment = Enum.TextXAlignment.Left
+textLabel2.ZIndex = 4
+local sidebarLine = pill(frame2,"SidebarLine", UDim2.fromOffset(23,105), UDim2.fromOffset(139,1), P.line)
+sidebarLine.BackgroundTransparency = 0.45
+label("MenuCaption", "YOUR DASHBOARD", frame2, UDim2.fromOffset(23,135), UDim2.fromOffset(145,19), Enum.Font.GothamBold, 9, P.subtle)
+
+-- Navigation: 3 equal buttons, separate line/stroke per tab, and correct contrast.
+for id, entry in pairs(tbl5) do
+    local btn = entry.btn
+    btn.Size = UDim2.new(1, -30, 0, 47)
+    btn.Position = UDim2.fromOffset(15, id == "logs" and 169 or id == "settings" and 229 or 289)
+    btn.BackgroundColor3 = id == "logs" and Color3.fromRGB(79,31,134) or P.inset
+    btn.BackgroundTransparency = id == "logs" and 0 or 0.05
+    btn.BorderSizePixel = 0
+    corner(btn, 12)
+    local edge = outline(btn, id == "logs" and P.neon or P.line, id == "logs" and 0.2 or 0.74, 1)
+    btn.AutoButtonColor = false
+    entry.ind.Size = UDim2.fromOffset(3,22)
+    entry.ind.Position = UDim2.fromOffset(2,12)
+    entry.ind.BackgroundColor3 = P.neon
+    corner(entry.ind, 2)
+    entry.lbl.Position = UDim2.fromOffset(18,0)
+    entry.lbl.Size = UDim2.new(1, -30, 1, 0)
+    entry.lbl.TextXAlignment = Enum.TextXAlignment.Left
+    entry.lbl.TextSize = 13
+    entry.lbl.Font = Enum.Font.GothamSemibold
+    entry.lbl.TextColor3 = id == "logs" and P.white or P.subtle
+    btn.MouseEnter:Connect(function()
+        if not (id == "logs" and frame6.Visible or id == "settings" and frame7.Visible or id == "whitelist" and frame8.Visible) then
+            TweenService:Create(btn,TweenInfo.new(.15),{BackgroundColor3=P.cardHover}):Play()
+        end
+    end)
+    btn.MouseLeave:Connect(function()
+        local chosen = id == "logs" and frame6.Visible or id == "settings" and frame7.Visible or id == "whitelist" and frame8.Visible
+        TweenService:Create(btn,TweenInfo.new(.15),{BackgroundColor3=chosen and Color3.fromRGB(79,31,134) or P.inset}):Play()
+    end)
+end
+local function refreshTabs()
+    for id, entry in pairs(tbl5) do
+        local chosen = (id == "logs" and frame6.Visible) or (id == "settings" and frame7.Visible) or (id == "whitelist" and frame8.Visible)
+        entry.btn.BackgroundColor3 = chosen and Color3.fromRGB(79,31,134) or P.inset
+        entry.btn.BackgroundTransparency = chosen and 0 or 0.05
+        entry.lbl.TextColor3 = chosen and P.white or P.subtle
+        local st = entry.btn:FindFirstChildOfClass("UIStroke")
+        if st then st.Color = chosen and P.neon or P.line; st.Transparency = chosen and 0.2 or 0.74 end
+    end
+end
+for _, entry in pairs(tbl5) do
+    entry.btn.MouseButton1Click:Connect(function()
+        task.delay(.24, refreshTabs)
+    end)
+end
+
+local footer = pill(frame2,"HydraStatus", UDim2.new(0,15,1,-77), UDim2.new(1,-30,0,53), P.inset)
+outline(footer,P.line,0.62,1)
+local readyDot = pill(footer,"StatusDot", UDim2.fromOffset(13,17), UDim2.fromOffset(7,7), Color3.fromRGB(125,233,171))
+corner(readyDot,4)
+label("StatusText","HYDRA  •  READY",footer,UDim2.fromOffset(27,9),UDim2.new(1,-33,0,22),Enum.Font.GothamBold,10,P.white)
+label("VersionText","VIP VERSION AJ  /  V8",footer,UDim2.fromOffset(13,30),UDim2.new(1,-20,0,14),Enum.Font.Gotham,9,P.subtle)
+textLabel3.Text = "RightShift  •  Hide / Show"
+textLabel3.TextColor3 = P.subtle
+textLabel3.TextSize = 9
+textLabel3.Position = UDim2.new(0,12,1,-96)
+textLabel3.Size = UDim2.new(1,-24,0,15)
+
+-- Banner: illustration-independent, gradient with a precise inset border.
+local banner = pill(frame,"HydraBanner",UDim2.fromOffset(202,14),UDim2.new(1,-217,0,102),P.inset)
+corner(banner,15)
+fill(banner,Color3.fromRGB(63,22,109),Color3.fromRGB(20,11,43),13)
+outline(banner,P.neon,0.50,1)
+local accentRail = pill(banner,"AccentRail",UDim2.fromOffset(15,18),UDim2.fromOffset(3,64),P.pink)
+corner(accentRail,2)
+label("BannerEyebrow","HYDRA  /  NEON EDITION",banner,UDim2.fromOffset(32,10),UDim2.new(1,-143,0,20),Enum.Font.GothamBold,10,P.pink)
+label("BannerName","HYDRA JOINER",banner,UDim2.fromOffset(30,38),UDim2.new(1,-150,0,41),Enum.Font.GothamBlack,29,P.white)
+label("BannerHint","SERVER TRACKER   /   JOIN IN ONE CLICK",banner,UDim2.fromOffset(32,74),UDim2.new(1,-145,0,16),Enum.Font.Gotham,9,P.subtle)
+-- Minimal accent ornament, placed to the right of the title, never on top of controls.
+local rightAccent = pill(banner,"RightAccent",UDim2.new(1,-117,0,30),UDim2.fromOffset(43,43),Color3.fromRGB(43,17,75))
+corner(rightAccent,13)
+outline(rightAccent,P.pink,0.45,1)
+local bolt = label("Mark","✦",rightAccent,UDim2.fromOffset(0,0),UDim2.fromScale(1,1),Enum.Font.GothamBlack,26,P.pink)
+bolt.TextXAlignment = Enum.TextXAlignment.Center
+
+-- Window controls sit on top of the banner in their own consistent mini squares.
+for _, b in ipairs({textButton, textButton2}) do
+    b.Size = UDim2.fromOffset(27,27)
+    b.BackgroundColor3 = Color3.fromRGB(32,19,57)
+    b.BackgroundTransparency = 0
+    b.TextColor3 = P.white
+    b.TextSize = 12
+    b.BorderSizePixel = 0
+    corner(b,8)
+    outline(b,P.line,0.51,1)
+    b.ZIndex = 9
+end
+textButton.Position = UDim2.new(1,-44,0,24)
+textButton2.Position = UDim2.new(1,-77,0,24)
+-- Original close/minimize callbacks stay connected; no side-floating button.
+
+label("FeedCaption","✧   LIVE SERVER FEED",frame,UDim2.fromOffset(211,127),UDim2.new(1,-250,0,23),Enum.Font.GothamBold,12,P.white)
+-- Move entire working panels below the hero; same original controls and callbacks.
+for _, panel in ipairs({frame6,frame7,frame8}) do
+    panel.Position = UDim2.fromOffset(186,156)
+    panel.Size = UDim2.new(1,-186,1,-166)
+    panel.BackgroundTransparency = 1
+end
+frame14.BackgroundColor3 = P.card
+frame14.Size = UDim2.new(1,-30,0,38)
+frame14.Position = UDim2.fromOffset(15,3)
+corner(frame14,11)
+outline(frame14,P.line,0.68,1)
+uiStroke5.Color = P.line
+uiStroke5.Transparency = 0.58
+textLabel4.TextColor3 = P.white
+textLabel4.TextSize = 12
+textLabel5.TextColor3 = P.subtle
+textLabel5.Position = UDim2.new(.40,0,0,0)
+textLabel5.Size = UDim2.new(.42,0,1,0)
+textLabel5.TextSize = 10
+textButton4.BackgroundColor3 = tbl2.AutoJoin and P.neon or Color3.fromRGB(69,48,91)
+frame16.BackgroundColor3 = P.white
+scrollingFrame2.Position = UDim2.fromOffset(0,49)
+scrollingFrame2.Size = UDim2.new(1,0,1,-51)
+scrollingFrame2.ScrollBarThickness = 3
+scrollingFrame2.ScrollBarImageColor3 = P.neon
+uiPadding2.PaddingLeft = UDim.new(0,15)
+uiPadding2.PaddingRight = UDim.new(0,15)
+uiListLayout2.Padding = UDim.new(0,7)
+scrollingFrame.ScrollBarImageColor3 = P.neon
+scrollingFrame3.ScrollBarImageColor3 = P.neon
+-- Settings and whitelist must remain readable (no fake overlay/panels on top).
+frame18.BackgroundColor3 = P.card
+frame18.Size = UDim2.new(1,-30,0,40)
+frame18.Position = UDim2.fromOffset(15,2)
+corner(frame18,11)
+outline(frame18,P.line,0.7,1)
+
+-- A single card renderer, also used for future incoming logs.
+local processed = setmetatable({}, {__mode="k"})
+local function polishCard(card)
+    if not card:IsA("Frame") or processed[card] then return end
+    processed[card] = true
+    card.Name = "HydraServerCard"
+    card.BackgroundColor3 = P.card
+    card.BackgroundTransparency = 0
+    card.BorderSizePixel = 0
+    card.Size = UDim2.new(1,0,0,54)
+    corner(card,11)
+    fill(card,Color3.fromRGB(39,20,69),Color3.fromRGB(24,14,47),4)
+    local stroke = outline(card,P.line,0.77,1)
+    for _,child in ipairs(card:GetChildren()) do
+        if child:IsA("TextButton") then
+            child.TextColor3 = P.white
+            child.BorderSizePixel = 0
+            child.Size = UDim2.fromOffset(child.Text=="JOIN" and 57 or 56,29)
+            child.Position = child.Text=="JOIN" and UDim2.new(1,-127,.5,-14) or UDim2.new(1,-65,.5,-14)
+            corner(child,9)
+            if child.Text == "JOIN" then
+                child.BackgroundColor3 = Color3.fromRGB(147,49,230)
+                fill(child,Color3.fromRGB(192,72,247),Color3.fromRGB(119,48,221),0)
+                outline(child,P.pink,.38,1)
+            elseif child.Text == "SPAM" then
+                child.BackgroundColor3 = Color3.fromRGB(54,29,91)
+                outline(child,P.line,.53,1)
+            end
+        elseif child:IsA("TextLabel") then
+            child.TextColor3 = child.TextSize >= 12 and P.white or P.subtle
+            child.TextTruncate = Enum.TextTruncate.AtEnd
+        elseif child:IsA("Frame") and child.Size.X.Offset <= 5 then
+            child.BackgroundColor3 = P.neon
+            child.Size = UDim2.new(0,3,0.48,0)
+            child.Position = UDim2.new(0,1,.26,0)
+            corner(child,3)
+        end
+    end
+    card.MouseEnter:Connect(function()
+        TweenService:Create(stroke,TweenInfo.new(.15),{Transparency=.45}):Play()
+    end)
+    card.MouseLeave:Connect(function()
+        TweenService:Create(stroke,TweenInfo.new(.15),{Transparency=.77}):Play()
+    end)
+end
+for _, child in ipairs(scrollingFrame2:GetChildren()) do polishCard(child) end
+scrollingFrame2.ChildAdded:Connect(function(child)
+    if child:IsA("Frame") then task.defer(polishCard,child) end
+end)
+-- Secondary settings tiles remain quiet and consistent.
+for _, container in ipairs({scrollingFrame,scrollingFrame3}) do
+    for _, o in ipairs(container:GetChildren()) do
+        if o:IsA("Frame") and o.BackgroundTransparency < 1 then
+            o.BackgroundColor3 = P.card
+            corner(o,10)
+            outline(o,P.line,.83,1)
+        end
+    end
+end
+-- ============================================================================
+-- HYDRA V8 | SIZE CONTROL + FIXED 1 HOUR TIMER + VIP + OPEN/CLOSE BUTTON
+-- Native UI only: no asset permissions or image dependencies.
+-- ============================================================================
+local sizeScaler = frame:FindFirstChild("HydraResponsiveScale")
+if not sizeScaler then
+    sizeScaler = Instance.new("UIScale")
+    sizeScaler.Name = "HydraResponsiveScale"
+    sizeScaler.Parent = frame
+end
+
+-- Countdown starts once and has no reset button or reset shortcut.
+-- If file functions are available, keep its original deadline across reinjections.
+-- No restart is performed when the hub is hidden or reopened.
+local timerChip = pill(banner, "OneHourTimer", UDim2.new(1, -332, 0, 7),
+    UDim2.fromOffset(168, 29), P.inset)
+corner(timerChip, 9)
+outline(timerChip, P.neon, 0.52, 1)
+fill(timerChip, Color3.fromRGB(66, 27, 105), Color3.fromRGB(29, 15, 56), 0)
+local hourMark = label("OneHourMark", "1H", timerChip,
+    UDim2.fromOffset(10, 0), UDim2.fromOffset(26, 29), Enum.Font.GothamBlack, 11, P.pink)
+local timeReadout = label("OneHourReadout", "01:00:00", timerChip,
+    UDim2.fromOffset(37, 0), UDim2.fromOffset(122, 29), Enum.Font.GothamBold, 15, P.white)
+timeReadout.TextXAlignment = Enum.TextXAlignment.Center
+
+-- VIP badge shown immediately to the right of the countdown.
+local vipBadge = pill(banner, "VipVersionAJ", UDim2.new(1, -158, 0, 7),
+    UDim2.fromOffset(91, 29), Color3.fromRGB(77, 31, 117))
+corner(vipBadge, 9)
+outline(vipBadge, P.pink, 0.34, 1)
+local vipText = label("VipLabel", "VIP VERSION AJ", vipBadge,
+    UDim2.fromOffset(2, 0), UDim2.new(1, -4, 1, 0), Enum.Font.GothamBold, 9, P.white)
+vipText.TextXAlignment = Enum.TextXAlignment.Center
+-- The old top-right ornament occupied the same space as the VIP badge.
+rightAccent.Visible = false
+
+-- Save/load a fixed deadline: re-executing should not give another hour.
+local timerFile = "HydraNotifier_OneHourDeadline.json"
+local timerDeadline = tonumber(_G.HydraOneHourDeadline)
+if not timerDeadline then
+    pcall(function()
+        if isfile and readfile and isfile(timerFile) then
+            local previous = HttpService:JSONDecode(readfile(timerFile))
+            if type(previous) == "table" then
+                timerDeadline = tonumber(previous.deadline)
+            end
+        end
+    end)
+end
+if not timerDeadline then
+    timerDeadline = os.time() + 3600
+    pcall(function()
+        if writefile then
+            writefile(timerFile, HttpService:JSONEncode({deadline = timerDeadline}))
+        end
+    end)
+end
+_G.HydraOneHourDeadline = timerDeadline
+
+local function renderCountdown()
+    local remaining = math.max(0, timerDeadline - os.time())
+    local hh = math.floor(remaining / 3600)
+    local mm = math.floor(remaining % 3600 / 60)
+    local ss = remaining % 60
+    timeReadout.Text = string.format("%02d:%02d:%02d", hh, mm, ss)
+    timeReadout.TextColor3 = remaining > 0 and P.white or P.pink
+end
+renderCountdown()
+task.spawn(function()
+    while screenGui.Parent and _G.HydraRunning do
+        renderCountdown()
+        task.wait(0.3)
+    end
+end)
+
+-- Sidebar size controls. The zoom setting is saved with existing config values.
+local sizeBox = pill(frame2, "HydraSizeControls", UDim2.fromOffset(15, 352),
+    UDim2.new(1, -30, 0, 66), P.inset)
+corner(sizeBox, 11)
+outline(sizeBox, P.line, .65, 1)
+label("SizeTitle", "TAILLE DU HUB", sizeBox, UDim2.fromOffset(10, 3),
+    UDim2.fromOffset(112, 21), Enum.Font.GothamBold, 10, P.subtle)
+local sizePercent = label("SizePercent", "100%", sizeBox,
+    UDim2.new(1, -60, 0, 3), UDim2.fromOffset(50, 21), Enum.Font.GothamBold, 11, P.white)
+sizePercent.TextXAlignment = Enum.TextXAlignment.Right
+
+local function sizeButton(name, title, xScale, xOffset)
+    local b = Instance.new("TextButton")
+    b.Name = name
+    b.Size = UDim2.fromOffset(28, 28)
+    b.Position = UDim2.new(xScale, xOffset, 0, 30)
+    b.BackgroundColor3 = Color3.fromRGB(66, 33, 112)
+    b.Text = title
+    b.TextColor3 = P.white
+    b.Font = Enum.Font.GothamBold
+    b.TextSize = 17
+    b.BorderSizePixel = 0
+    b.AutoButtonColor = true
+    b.ZIndex = 6
+    b.Parent = sizeBox
+    corner(b, 8)
+    outline(b, P.line, .45, 1)
+    return b
+end
+local zoomMinus = sizeButton("MakeSmaller", "−", 0, 9)
+local zoomPlus = sizeButton("MakeBigger", "+", 1, -37)
+
+local sliderTrack = Instance.new("TextButton")
+sliderTrack.Name = "ZoomSlider"
+sliderTrack.Size = UDim2.new(1, -92, 0, 8)
+sliderTrack.Position = UDim2.new(0, 46, 0, 41)
+sliderTrack.BackgroundColor3 = Color3.fromRGB(70, 49, 107)
+sliderTrack.Text = ""
+sliderTrack.BorderSizePixel = 0
+sliderTrack.AutoButtonColor = false
+sliderTrack.ZIndex = 6
+sliderTrack.Parent = sizeBox
+corner(sliderTrack, 8)
+local sliderFill = Instance.new("Frame")
+sliderFill.Name = "Fill"
+sliderFill.Size = UDim2.fromScale(.5, 1)
+sliderFill.BackgroundColor3 = P.neon
+sliderFill.BorderSizePixel = 0
+sliderFill.ZIndex = 7
+sliderFill.Parent = sliderTrack
+corner(sliderFill, 8)
+local sliderHandle = Instance.new("Frame")
+sliderHandle.Name = "Thumb"
+sliderHandle.Size = UDim2.fromOffset(13, 13)
+sliderHandle.Position = UDim2.new(.5, -6, .5, -6)
+sliderHandle.BackgroundColor3 = P.white
+sliderHandle.BorderSizePixel = 0
+sliderHandle.ZIndex = 8
+sliderHandle.Parent = sliderTrack
+corner(sliderHandle, 7)
+outline(sliderHandle, P.neon, .12, 1.2)
+
+local minScale, hardMaxScale = 0.60, 1.30
+local chosenScale = math.clamp(tonumber(tbl2.InterfaceScale) or 1, minScale, hardMaxScale)
+local function screenMaxScale()
+    local camera = workspace.CurrentCamera
+    if not camera then return 1 end
+    local viewport = camera.ViewportSize
+    if viewport.X <= 0 or viewport.Y <= 0 then return 1 end
+    return math.clamp(math.min((viewport.X - 30)/820, (viewport.Y - 30)/508), .42, hardMaxScale)
+end
+local function renderScale()
+    local actual = math.min(chosenScale, screenMaxScale())
+    sizeScaler.Scale = actual
+    sizePercent.Text = tostring(math.floor(actual * 100 + .5)) .. "%"
+    local screenMax = screenMaxScale()
+    local lower = math.min(minScale, screenMax)
+    local progress = (screenMax > lower + .001) and math.clamp((actual - lower)/(screenMax - lower), 0, 1) or 1
+    sliderFill.Size = UDim2.fromScale(progress, 1)
+    sliderHandle.Position = UDim2.new(progress, -6, .5, -6)
+    -- Existing show/hide animations reference these two positions.
+    -- UIScale changes the actual visual dimensions, so recenter using scaled pixels.
+    udim2 = UDim2.new(.5, -410*actual, .5, -254*actual)
+    udim22 = UDim2.new(.5, -410*actual, 1.5, 0)
+    if frame.Visible and flag then
+        frame.Position = udim2
+    end
+end
+local function changeScale(requested)
+    local allowed = screenMaxScale()
+    local lower = math.min(minScale, allowed)
+    chosenScale = math.clamp(math.floor(requested*100 + .5)/100, lower, allowed)
+    tbl2.InterfaceScale = chosenScale
+    renderScale()
+end
+
+zoomMinus.MouseButton1Click:Connect(function()
+    changeScale(chosenScale - .05)
+end)
+zoomPlus.MouseButton1Click:Connect(function()
+    changeScale(chosenScale + .05)
+end)
+
+local sliderDragging = false
+local function slideTo(input)
+    local width = sliderTrack.AbsoluteSize.X
+    if width < 1 then return end
+    local amount = math.clamp((input.Position.X - sliderTrack.AbsolutePosition.X) / width, 0, 1)
+    local currentMax = screenMaxScale()
+    local lower = math.min(minScale, currentMax)
+    changeScale(lower + amount*(currentMax-lower))
+end
+sliderTrack.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        sliderDragging = true
+        slideTo(input)
+    end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if sliderDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        slideTo(input)
+    end
+end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        sliderDragging = false
+    end
+end)
+
+-- Optional keyboard shortcuts when the hub is open: Ctrl + Plus or Minus.
+-- The button/slider works on both desktop and touch.
+renderScale()
+local function refreshViewportScale()
+    if screenGui.Parent then renderScale() end
+end
+local lastCamera
+local viewportConnection
+local function watchCamera()
+    if viewportConnection then viewportConnection:Disconnect(); viewportConnection = nil end
+    lastCamera = workspace.CurrentCamera
+    if lastCamera then
+        viewportConnection = lastCamera:GetPropertyChangedSignal("ViewportSize"):Connect(refreshViewportScale)
+    end
+    refreshViewportScale()
+end
+watchCamera()
+workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(watchCamera)
+
+-- Slightly shorten this subtitle so the timer never overlaps it.
+textLabel3.Visible = false -- old footer hint would overlap the new zoom bar
+local hint = banner:FindFirstChild("BannerHint")
+if hint then
+    hint.Size = UDim2.new(1, -330, 0, 16)
+    hint.TextSize = 8
+end
