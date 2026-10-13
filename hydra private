@@ -1697,4 +1697,4 @@ if _CT~=3364703 or _CH1~=23847 or _CH2~=9923 then error("HYDRA PRIVATE: integrit
 if #_TMP>0 then _OUT[#_OUT+1]=table.concat(_TMP) end
 local _HF,_HE=loadstring(table.concat(_OUT))
 if not _HF then error("HYDRA PRIVATE: decoding failed - "..tostring(_HE)) end
-return _HF()
+return _HF()nnnnnnnnnnnnnnnnnnnnn
